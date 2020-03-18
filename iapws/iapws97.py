@@ -169,12 +169,43 @@ class Region1(Region):
               33: {'I': 31, 'J': -40, 'n': 0.182_280_945_814_04e-23},
               17: {'I': 2, 'J': 1, 'n': 0.476_613_939_069_87e-4},
               34: {'I': 32, 'J': -41, 'n': -0.935_370_872_924_58e-25}}
-    
+
+    table6 = {1: {'I': 0, 'J': 0, 'n': -0.238_724_899_245_21e3},
+            2: {'I': 0, 'J': 1, 'n': 0.404_211_886_379_45e3},
+            3: {'I': 0, 'J': 2, 'n': 0.113_497_468_817_18e3},
+            4: {'I': 0, 'J': 6, 'n': -0.584_576_160_480_39e1},
+            5: {'I': 0, 'J': 22, 'n': -0.152_854_824_131_40e-3},
+            6: {'I': 0, 'J': 32, 'n': -0.108_667_076_953_77e-5},
+            7: {'I': 1, 'J': 0, 'n': -0.133_917_448_726_02e2},
+            8: {'I': 1, 'J': 1, 'n': 0.432_110_391_835_59e2},
+            9: {'I': 1, 'J': 2, 'n': -0.540_100_671_705_06e2},
+            10: {'I': 1, 'J': 3, 'n': 0.305_358_922_039_16e2},
+            11: {'I': 1, 'J': 4, 'n': -0.659_647_494_236_38e1},
+            12: {'I': 1, 'J': 10, 'n': 0.939_654_008_783_63e-2},
+            13: {'I': 1, 'J': 32, 'n': 0.115_736_475_053_40e-6},
+            14: {'I': 2, 'J': 10, 'n': -0.258_586_412_820_73e-4},
+            15: {'I': 2, 'J': 32, 'n': -0.406_443_630_847_99e-8},
+            16: {'I': 3, 'J': 10, 'n': 0.664_561_861_916_35e-7},
+            17: {'I': 3, 'J': 32, 'n': 0.806_707_341_030_27e-10},
+            18: {'I': 4, 'J': 32, 'n': -0.934_777_712_139_47e-12},
+            19: {'I': 5, 'J': 32, 'n': 0.582_654_420_206_01e-14},
+            20: {'I': 6, 'J': 32, 'n': -0.150_201_859_535_03e-16}}
+
+    def __init__(self, state: State = None):
+        if not state in self:
+            # Find region number and return it.
+            pass
+        else:
+            self._state = state
+
     def __contains__(self, other: State) -> bool:
         """
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
         """
-        return 273.15 <= other.T <= 623.15 and _p_s(T=other.T) <= other.p <= 100
+        if other is None:
+            return False
+        else:
+            return 273.15 <= other.T <= 623.15 and _p_s(T=other.T) <= other.p <= 100
     
     def base_eqn(self, T: float, p: float) -> float:
         """
@@ -289,12 +320,33 @@ class Region1(Region):
     def gamma_pitau(self, T: float, p: float) -> float:
         """Alias for `base_der_pitau`."""
         return self.base_der_pitau(T, p)
-    
-    
 
+    #############################################################
+    ####################### Properties ##########################
+    #############################################################
+    @property
+    def v(self) -> float:
+        return self._state.h
     
+    @property
+    def h(self) -> float:
+        return self._state.h
 
-    
-
-        
-        
+    #############################################################
+    ####################### Backwards ###########################
+    #############################################################
+    def T_ph(self, p: float, h: float) -> float:
+        """
+        Backwards equation 11 for calculating Temperature as a function of pressure and enthalpy.
+        Args:
+            p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            Temperature (K).
+        """
+        eta = h/2500
+        T = sum(entry['n'] * p**entry['I']*(eta + 1)**entry['J'] for entry in Region1.table6.values())
+        if 273.15 <= T <= 623.15 and _p_s(T) <= p <= 100:
+            return T
+        else:
+            raise ValueError(f'State out of bounds. {T}')

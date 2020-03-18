@@ -48,6 +48,15 @@ class TestRegion1(unittest.TestCase):
 
         s = iapws97.State(T=300, p=3)
         self.assertTrue(s in iapws97.Region1())
+    
+    def test_backwards_t_ph(self):
+        pees = [3, 80, 80]
+        hs = [500, 500, 1500]
+        tees = [0.391_798_509e3, 0.378_108_626e3, 0.611_041_229e3]
+
+        for p, h, T in zip(pees, hs, tees):
+            T_calc = iapws97.Region1().T_ph(p, h)
+            self.assertAlmostEqual(T, T_calc, places=6)
 
 
 
