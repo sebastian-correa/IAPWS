@@ -25,5 +25,15 @@ class Test_iapws97(unittest.TestCase):
 
         self.assertRaises(ValueError, iapws97.b23, T=T, p=p)
 
+    def test_p_s_eq_30(self):
+        tees = [300, 500, 600]
+        pss = [0.353_658_941e-2, 0.263_889_776e1, 0.123_443_146e2]
+
+        for T, ps in zip(tees, pss):
+            self.assertAlmostEqual(iapws97._p_s(T), ps)
+    
+    def test_p_s_exeption(self):
+        self.assertRaises(ValueError, iapws97._p_s, T=1000)
+
 if __name__ == '__main__':
     unittest.main()
