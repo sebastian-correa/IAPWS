@@ -92,14 +92,14 @@ def region(p: float, T: float) -> int:
         raise ValueError('Parameters out of bounds.')
 
 class State(NamedTuple):
-    T: float
-    p: float
-    v: float
-    u: float
-    h: float
-    cp: float
-    cv: float
-    w: float
+    T: float = None
+    p: float = None
+    v: float = None
+    u: float = None
+    h: float = None
+    cp: float = None
+    cv: float = None
+    w: float = None
 
 class Region(ABC):
     """
@@ -112,12 +112,189 @@ class Region(ABC):
 
     A Region can also have many constants at a class level if those constants are used only inside said region. Otherwise, a module level constant is favoured.
     """
-    def __contains__(self, other: Point):
+    def __contains__(self, other: State) -> bool:
         """
-        Overrides the behaviour of the `in` operator to facilitate a `State in Region` quary.
+        Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
         """
     
     def base_eqn(self):
         """
         Implements the base equation.
-        """ 
+        """
+
+class Region1(Region):
+    """
+    Region1 implements Region1 of the IAPWS97 standard.
+
+    Methods:
+        __contains__
+        base_eqn
+
+    Class attributes:
+
+    Instance attributes:
+
+    """
+    table2 = {1: {'I': 0, 'J': -2, 'n': 0.146_329_712_131_67},
+              18: {'I': 2, 'J': 3, 'n': -0.441_418_453_308_46e-5},
+              2: {'I': 0, 'J': -1, 'n': -0.845_481_871_691_14},
+              19: {'I': 2, 'J': 17, 'n': -0.726_949_962_975_94e-15},
+              3: {'I': 0, 'J': 0, 'n': -0.375_636_036_720_40e1},
+              20: {'I': 3, 'J': -4, 'n': -0.316_796_448_450_54e-4},
+              4: {'I': 0, 'J': 1, 'n': 0.338_551_691_683_85e1},
+              21: {'I': 3, 'J': 0, 'n': -0.282_707_979_853_12e-5},
+              5: {'I': 0, 'J': 2, 'n': -0.957_919_633_878_72},
+              22: {'I': 3, 'J': 6, 'n': -0.852_051_281_201_03e-9},
+              6: {'I': 0, 'J': 3, 'n': 0.157_720_385_132_28},
+              23: {'I': 4, 'J': -5, 'n': -0.224_252_819_080_00e-5},
+              7: {'I': 0, 'J': 4, 'n': -0.166_164_171_995_01e-1},
+              24: {'I': 4, 'J': -2, 'n': -0.651_712_228_956_01e-6},
+              8: {'I': 0, 'J': 5, 'n': 0.812_146_299_835_68e-3},
+              25: {'I': 4, 'J': 10, 'n': -0.143_417_299_379_24e-12},
+              9: {'I': 1, 'J': -9, 'n': 0.283_190_801_238_04e-3},
+              26: {'I': 5, 'J': -8, 'n': -0.405_169_968_601_17e-6},
+              10: {'I': 1, 'J': -7, 'n': -0.607_063_015_658_74e-3},
+              27: {'I': 8, 'J': -11, 'n': -0.127_343_017_416_41e-8},
+              11: {'I': 1, 'J': -1, 'n': -0.189_900_682_184_19e-1},
+              28: {'I': 8, 'J': -6, 'n': -0.174_248_712_306_34e-9},
+              12: {'I': 1, 'J': 0, 'n': -0.325_297_487_705_05e-1},
+              29: {'I': 21, 'J': -29, 'n': -0.687_621_312_955_31e-18},
+              13: {'I': 1, 'J': 1, 'n': -0.218_417_171_754_14e-1},
+              30: {'I': 23, 'J': -31, 'n': 0.144_783_078_285_21e-19},
+              14: {'I': 1, 'J': 3, 'n': -0.528_383_579_699_30e-4},
+              31: {'I': 29, 'J': -38, 'n': 0.263_357_816_627_95e-22},
+              15: {'I': 2, 'J': -3, 'n': -0.471_843_210_732_67e-3},
+              32: {'I': 30, 'J': -39, 'n': -0.119_476_226_400_71e-22},
+              16: {'I': 2, 'J': 0, 'n': -0.300_017_807_930_26e-3},
+              33: {'I': 31, 'J': -40, 'n': 0.182_280_945_814_04e-23},
+              17: {'I': 2, 'J': 1, 'n': 0.476_613_939_069_87e-4},
+              34: {'I': 32, 'J': -41, 'n': -0.935_370_872_924_58e-25}}
+    
+    def __contains__(self, other: State) -> bool:
+        """
+        Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
+        """
+        return 273.15 <= other.T <= 623.15 and _p_s(T=other.T) <= other.p <= 100
+    
+    def base_eqn(self, T: float, p: float) -> float:
+        """
+        Dimensionless specific Gibbs free energy (eq. 7).
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Dimensionless specific Gibbs free energy.
+        """
+        tau = 1386 / T
+        _pi = p / 16.53
+        return sum(entry['n'] * (7.1 - _pi)**entry['I'] * (tau - 1.222)**entry['J'] for entry in Region1.table2.items())
+
+    def specific_gibbs_free_energy(self, T: float, p: float) -> float:
+        """
+        Specific Gibbs free energy (eq. 7).
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Specific Gibbs free energy.
+        """
+        return self.base_eqn(T, p) * R * T
+    
+    def gamma(self, T: float, p: float) -> float:
+        """Alias for `self.base_eqn`"""
+        return self.base_eqn(T, p)
+    
+    #############################################################
+    ################## FIRST ORDER DERIVATIVES ##################
+    #############################################################
+    def base_der_pi_const_tau(self, T: float, p: float) -> float:
+        """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
+        """
+        tau = 1386 / T
+        _pi = p / 16.53
+        return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * (tau - 1.222)**entry['J'] for entry in Region1.table2.items())
+    
+    def gamma_pi(self, T: float, p: float) -> float:
+        """Alias for `base_der_pi_const_tau`."""
+        return self.base_der_pi_const_tau(T, p)
+
+    def base_der_tau_const_pi(self, T: float, p: float) -> float:
+        """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+        """
+        tau = 1386 / T
+        _pi = p / 16.53
+        return sum(- entry['n'] * (7.1 - _pi)**(entry['I'] - 1) * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.items())
+    
+    def gamma_tau(self, T: float, p: float) -> float:
+        """Alias for `base_der_tau_const_pi`."""
+        return self.base_der_tau_const_pi(T, p)
+
+    #############################################################
+    ################# SECOND ORDER DERIVATIVES ##################
+    #############################################################
+    def base_der2_pipi_const_tau(self, T: float, p: float) -> float:
+        """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
+        """
+        tau = 1386 / T
+        _pi = p / 16.53
+        return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * (7.1 - _pi)**(entry['I'] - 2) * (tau - 1.222)**entry['J'] for entry in Region1.table2.items())
+    
+    def gamma_pipi(self, T: float, p: float) -> float:
+        """Alias for `base_der2_pipi_const_tau`."""
+        return self.base_der2_pipi_const_tau(T, p)
+
+    def base_der_tautau_const_pi(self, T: float, p: float) -> float:
+        """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+        """
+        tau = 1386 / T
+        _pi = p / 16.53
+        return sum(entry['n'] * (7.1 - _pi)**entry['I'] * entry['J'] * (entry['J'] -1) * (tau - 1.222)**(entry['J'] - 2) for entry in Region1.table2.items())
+    
+    def gamma_tautau(self, T: float, p: float) -> float:
+        """Alias for `base_der_tautau_const_pi`."""
+        return self.base_der_tautau_const_pi(T, p)
+    
+    def base_der_pitau(self, T: float, p: float) -> float:
+        """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
+        """
+        tau = 1386 / T
+        _pi = p / 16.53
+        return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.items())
+    
+    def gamma_pitau(self, T: float, p: float) -> float:
+        """Alias for `base_der_pitau`."""
+        return self.base_der_pitau(T, p)
+    
+    
+
+    
+
+    
+
+        
+        

@@ -1,7 +1,7 @@
 import unittest
 from iapws import iapws97
 
-class Test_iapws97(unittest.TestCase):
+class GeneralTests(unittest.TestCase):
     
     def test_b23_eq_5(self):
         T = 0.623_150_000 * 10**3
@@ -34,6 +34,22 @@ class Test_iapws97(unittest.TestCase):
     
     def test_p_s_exeption(self):
         self.assertRaises(ValueError, iapws97._p_s, T=1000)
+
+class TestRegion1(unittest.TestCase):
+
+    def test_range_validity(self):
+        s = iapws97.State(T=300, p=3)
+        s1 = iapws97.State(T=300, p=80)
+        s2 = iapws97.State(T=500, p=3)
+
+        self.assertTrue(s in iapws97.Region1())
+        self.assertTrue(s2 in iapws97.Region1())
+        self.assertTrue(s2 in iapws97.Region1())
+
+        s = iapws97.State(T=300, p=3)
+        self.assertTrue(s in iapws97.Region1())
+
+
 
 if __name__ == '__main__':
     unittest.main()
