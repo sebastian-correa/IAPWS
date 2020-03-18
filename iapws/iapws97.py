@@ -1,5 +1,7 @@
 import numpy as np
-from typing import Optional
+from typing import Optional, NamedTuple
+from abc import ABC
+
 R = 0.461526        # kJ/(kg*K)
 T_c = 647.096       # K
 p_c = 22.064        # MPa
@@ -89,3 +91,33 @@ def region(p: float, T: float) -> int:
     else:
         raise ValueError('Parameters out of bounds.')
 
+class State(NamedTuple):
+    T: float
+    p: float
+    v: float
+    u: float
+    h: float
+    cp: float
+    cv: float
+    w: float
+
+class Region(ABC):
+    """
+    Region Abstract Base Class detailing how a region should be implemented.
+
+    Available methods vary by region due to the different implementations in the standard. 
+    
+    However, each region has a base equation from which all properties are derived, access to the necessary first and second order partial derivatives and all backwards equations.
+    Further, a region must override the `__contains__` method to facilitate a `State in Region` type of query.
+
+    A Region can also have many constants at a class level if those constants are used only inside said region. Otherwise, a module level constant is favoured.
+    """
+    def __contains__(self, other: Point):
+        """
+        Overrides the behaviour of the `in` operator to facilitate a `State in Region` quary.
+        """
+    
+    def base_eqn(self):
+        """
+        Implements the base equation.
+        """ 
