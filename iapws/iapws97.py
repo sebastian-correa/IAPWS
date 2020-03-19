@@ -190,6 +190,27 @@ class Region1(Region):
             18: {'I': 4, 'J': 32, 'n': -0.934_777_712_139_47e-12},
             19: {'I': 5, 'J': 32, 'n': 0.582_654_420_206_01e-14},
             20: {'I': 6, 'J': 32, 'n': -0.150_201_859_535_03e-16}}
+    
+    table8 = {1: {'I': 0, 'J': 0, 'n': 0.174_782_680_583_07e3},
+              2: {'I': 0, 'J': 1, 'n': 0.348_069_308_928_73e2},
+              3: {'I': 0, 'J': 2, 'n': 0.652_925_849_784_55e1},
+              4: {'I': 0, 'J': 3, 'n': 0.330_399_817_754_89},
+              5: {'I': 0, 'J': 11, 'n': -0.192_813_829_231_96e-6},
+              6: {'I': 0, 'J': 31, 'n': -0.249_091_972_445_73e-22},
+              7: {'I': 1, 'J': 0, 'n': -0.261_076_364_893_32},
+              8: {'I': 1, 'J': 1, 'n': 0.225_929_659_815_86},
+              9: {'I': 1, 'J': 2, 'n': -0.642_564_633_952_26e-1},
+              10: {'I': 1, 'J': 3, 'n': 0.788_762_892_705_26e-2},
+              11: {'I': 1, 'J': 12, 'n': 0.356_721_106_073_66e-9},
+              12: {'I': 1, 'J': 31, 'n': 0.173_324_969_948_95e-23},
+              13: {'I': 2, 'J': 0, 'n': 0.566_089_006_548_37e-3},
+              14: {'I': 2, 'J': 1, 'n': -0.326_354_831_397_17e-3},
+              15: {'I': 2, 'J': 2, 'n': 0.447_782_866_906_32e-4},
+              16: {'I': 2, 'J': 9, 'n': -0.513_221_569_085_07e-9},
+              17: {'I': 2, 'J': 31, 'n': -0.425_226_570_422_07e-25},
+              18: {'I': 3, 'J': 10, 'n': 0.264_004_413_606_89e-12},
+              19: {'I': 3, 'J': 32, 'n': 0.781_246_004_597_23e-28},
+              20: {'I': 4, 'J': 32, 'n': -0.307_321_999_036_68e-30}}
 
     def __init__(self, state: State = None):
         if not state in self:
@@ -218,7 +239,7 @@ class Region1(Region):
         """
         tau = 1386 / T
         _pi = p / 16.53
-        return sum(entry['n'] * (7.1 - _pi)**entry['I'] * (tau - 1.222)**entry['J'] for entry in Region1.table2.items())
+        return sum(entry['n'] * (7.1 - _pi)**entry['I'] * (tau - 1.222)**entry['J'] for entry in Region1.table2.values())
 
     def specific_gibbs_free_energy(self, T: float, p: float) -> float:
         """
@@ -248,7 +269,7 @@ class Region1(Region):
         """
         tau = 1386 / T
         _pi = p / 16.53
-        return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * (tau - 1.222)**entry['J'] for entry in Region1.table2.items())
+        return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * (tau - 1.222)**entry['J'] for entry in Region1.table2.values())
     
     def gamma_pi(self, T: float, p: float) -> float:
         """Alias for `base_der_pi_const_tau`."""
@@ -264,7 +285,7 @@ class Region1(Region):
         """
         tau = 1386 / T
         _pi = p / 16.53
-        return sum(- entry['n'] * (7.1 - _pi)**(entry['I'] - 1) * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.items())
+        return sum(- entry['n'] * (7.1 - _pi)**(entry['I'] - 1) * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.values())
     
     def gamma_tau(self, T: float, p: float) -> float:
         """Alias for `base_der_tau_const_pi`."""
@@ -283,7 +304,7 @@ class Region1(Region):
         """
         tau = 1386 / T
         _pi = p / 16.53
-        return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * (7.1 - _pi)**(entry['I'] - 2) * (tau - 1.222)**entry['J'] for entry in Region1.table2.items())
+        return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * (7.1 - _pi)**(entry['I'] - 2) * (tau - 1.222)**entry['J'] for entry in Region1.table2.values())
     
     def gamma_pipi(self, T: float, p: float) -> float:
         """Alias for `base_der2_pipi_const_tau`."""
@@ -299,7 +320,7 @@ class Region1(Region):
         """
         tau = 1386 / T
         _pi = p / 16.53
-        return sum(entry['n'] * (7.1 - _pi)**entry['I'] * entry['J'] * (entry['J'] -1) * (tau - 1.222)**(entry['J'] - 2) for entry in Region1.table2.items())
+        return sum(entry['n'] * (7.1 - _pi)**entry['I'] * entry['J'] * (entry['J'] -1) * (tau - 1.222)**(entry['J'] - 2) for entry in Region1.table2.values())
     
     def gamma_tautau(self, T: float, p: float) -> float:
         """Alias for `base_der_tautau_const_pi`."""
@@ -315,7 +336,7 @@ class Region1(Region):
         """
         tau = 1386 / T
         _pi = p / 16.53
-        return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.items())
+        return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.values())
     
     def gamma_pitau(self, T: float, p: float) -> float:
         """Alias for `base_der_pitau`."""
@@ -349,4 +370,20 @@ class Region1(Region):
         if 273.15 <= T <= 623.15 and _p_s(T) <= p <= 100:
             return T
         else:
+            raise ValueError(f'State out of bounds. {T}')
+
+    def T_ps(self, p: float, s: float) -> float:
+        """
+        Backwards equation 13 for calculating Temperature as a function of pressure and entropy.
+        Args:
+            p: Pressure (MPa).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Temperature (K).
+        """
+        T = sum(entry['n'] * p**entry['I'] * (s + 2)**entry['J'] for entry in Region1.table8.values())
+        if 273.15 <= T <= 623.15 and _p_s(T) <= p <= 100:
+            return T
+        else:
+            #TODO: Suggest a region.
             raise ValueError(f'State out of bounds. {T}')
