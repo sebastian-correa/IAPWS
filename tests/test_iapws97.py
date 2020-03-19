@@ -1,5 +1,6 @@
 import unittest
 from iapws import iapws97
+import numpy as np
 
 class GeneralTests(unittest.TestCase):
     
@@ -48,7 +49,7 @@ class TestRegion1(unittest.TestCase):
 
         s = iapws97.State(T=300, p=3)
         self.assertTrue(s in iapws97.Region1())
-    
+
     def test_backwards_t_ph(self):
         pees = [3, 80, 80]
         hs = [500, 500, 1500]
@@ -76,7 +77,25 @@ class TestRegion1(unittest.TestCase):
             p_calc = iapws97.Region1().p_hs(h, s)
             self.assertAlmostEqual(p, p_calc, places=6)
 
+    def test_property_accuracy(self):
+        """Test the results from Table 5."""
+        s = iapws97.State(T=300, p=3)
+        s1 = iapws97.State(T=300, p=80)
+        s2 = iapws97.State(T=500, p=3)
+        states = [s, s1, s2]
 
+        table5 = np.array([[0.100215168e-2, 0.971180894e-3, 0.120241800e-2],
+                           [0.115331273e3, 0.184142828e3, 0.975542239e3],
+                           [0.112324818e3, 0.106448356e3, 0.971934985e3],
+                           [0.392294792, 0.368563852, 0.258041912e1],
+                           [0.417301218e1, 0.401008987e1, 0.465580682e1],
+                           [0.150773921e4, 0.163469054e4, 0.124071337e4]])
+        table5 = table5.T
+
+        for state, properties in zip(states, table5):
+            r = iapws97.Region1(state=state)
+            p = [r.v, r.h, r.u, r.s, r.cp, r.w]
+            np.testing.assert_almost_equal(properties, p, decimal=5)
 
 if __name__ == '__main__':
     unittest.main()
