@@ -211,6 +211,27 @@ class Region1(Region):
               18: {'I': 3, 'J': 10, 'n': 0.264_004_413_606_89e-12},
               19: {'I': 3, 'J': 32, 'n': 0.781_246_004_597_23e-28},
               20: {'I': 4, 'J': 32, 'n': -0.307_321_999_036_68e-30}}
+    
+    table2_supp = {1: {'I': 0, 'J': 0, 'n': -0.691997014660582},
+                   2: {'I': 0, 'J': 1, 'n': -1.83612548787560e1},
+                   3: {'I': 0, 'J': 2, 'n': -9.28332409297335e0},
+                   4: {'I': 0, 'J': 4, 'n': 6.59639569909906e1},
+                   5: {'I': 0, 'J': 5, 'n': -1.62060388912024e1},
+                   6: {'I': 0, 'J': 6, 'n': 4.50620017338667e2},
+                   7: {'I': 0, 'J': 8, 'n': 8.54680678224170e2},
+                   8: {'I': 0, 'J': 14, 'n': 6.07523214001162e3},
+                   9: {'I': 1, 'J': 0, 'n': 3.26487682621856e1},
+                   10: {'I': 1, 'J': 1, 'n': -2.69408844582931e1},
+                   11: {'I': 1, 'J': 4, 'n': -3.19947848334300e2},
+                   12: {'I': 1, 'J': 6, 'n': -9.28354307043320e2},
+                   13: {'I': 2, 'J': 0, 'n': 3.03634537455249e1},
+                   14: {'I': 2, 'J': 1, 'n': -6.50540422444146e1},
+                   15: {'I': 2, 'J': 10, 'n': -4.30991316516130e3},
+                   16: {'I': 3, 'J': 4, 'n': -7.47512324096068e2},
+                   17: {'I': 4, 'J': 1, 'n': 7.30000345529245e2},
+                   18: {'I': 4, 'J': 4, 'n': 1.14284032569021e3},
+                   19: {'I': 5, 'J': 0, 'n': -4.36407041874559e2}}
+
 
     def __init__(self, state: State = None):
         if not state in self:
@@ -367,7 +388,7 @@ class Region1(Region):
         """
         eta = h/2500
         T = sum(entry['n'] * p**entry['I']*(eta + 1)**entry['J'] for entry in Region1.table6.values())
-        if 273.15 <= T <= 623.15 and _p_s(T) <= p <= 100:
+        if State(p=p, T=T) in self:
             return T
         else:
             raise ValueError(f'State out of bounds. {T}')
@@ -382,8 +403,30 @@ class Region1(Region):
             Temperature (K).
         """
         T = sum(entry['n'] * p**entry['I'] * (s + 2)**entry['J'] for entry in Region1.table8.values())
-        if 273.15 <= T <= 623.15 and _p_s(T) <= p <= 100:
+        if State(p=p, T=T) in self:
             return T
         else:
             #TODO: Suggest a region.
             raise ValueError(f'State out of bounds. {T}')
+
+    def p_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation 1 from [1] for calculating pressure as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Pressure (MPa).
+        References:
+            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
+        """
+        eta = h / 3400
+        sigma = s / 7.6
+        
+        p = 100 * sum(entry['n'] * (eta + 0.05)**entry['I'] * (sigma + 0.05)**entry['J'] for entry in Region1.table2_supp.values())
+        T = self.T_ps(p, s)
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds.')
+        
