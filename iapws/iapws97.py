@@ -76,22 +76,7 @@ def region(p: float, T: float) -> int:
     Raises:
         ValueError is p and T combination are out of bounds.
     """
-    if 1073.15 <= T <= 2273.15 and 0 <= p <= 50:
-        return 5
-    elif 273.15 <= T <= 1073.15 and 0 <= p <= 100:
-        T_b23 = b23(p=p)
-        p_b23 = b23(T=T)
-
-        if T >= T_b23 and p <= p_b23:
-            return 2
-        elif 623.15 <= T <= T_b23 and p > p_b23:
-            return 3
-        elif 273.15 <= T <= 623.15 and p > p_b23:
-            return 1
-        else:
-            raise ValueError('Parameters out of bounds.')
-    else:
-        raise ValueError('Parameters out of bounds.')
+    pass
 
 @dataclass
 class State(object):
@@ -788,6 +773,26 @@ class Region2(Region):
         else:
             self._state = State()
 
+    def b23(self, p: Optional[float] = None, T: Optional[float] = None) -> float:
+        """
+        Implements the equation for the boundary between 2 and 3.
+        Args:
+            p: Pressure (MPa).
+            T: Temperature (K).
+        Returns:
+            The value of T if p is given or the value of p is T is given.
+        Raises:
+            ValueError if both p and T are supplied.
+        """
+        if T is not None and p is None:
+            _pi = b23_const[1] + b23_const[2] * T + b23_const[3] * T**2
+            return  _pi
+        elif p is not None and T is None:
+            theta = b23_const[4] + np.sqrt( (p - b23_const[5]) / b23_const[3] )
+            return  theta
+        else:
+            raise ValueError('Pass only T or P, not both.')
+
     def __contains__(self, other: State) -> bool:
         """
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
@@ -795,7 +800,10 @@ class Region2(Region):
         if not isinstance(other, State):
             return False
         else:
-            return 273.15 <= other.T <= 623.15 and _p_s(T=other.T) <= other.p <= 100
+            cond1 = 273.15 <= other.T <= 623.15 and 0 <= other.p <= _p_s(T=other.T)
+            cond2 = 623.15 <= other.T <= 863.15 and 0 <= other.p <= self.b23(T=other.T)
+            cond3 = 863.15 <= other.T <= 1073.15 and 0 <= other.p <= 100
+            return cond1 or cond2 or cond3
     
     @staticmethod
     def base_eqn(T: float, p: float) -> float:

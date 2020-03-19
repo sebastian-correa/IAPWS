@@ -97,5 +97,18 @@ class TestRegion1(unittest.TestCase):
             p = [r.v, r.h, r.u, r.s, r.cp, r.w]
             np.testing.assert_almost_equal(properties, p, decimal=5)
 
+class TestRegion2(unittest.TestCase):
+
+    def test_range_validity(self):
+        s = iapws97.State(T=300, p=0.0035)
+        s1 = iapws97.State(T=700, p=0.0035)
+        s2 = iapws97.State(T=700, p=30)
+
+        self.assertTrue(s in iapws97.Region2())
+        self.assertTrue(s2 in iapws97.Region2())
+        self.assertTrue(s2 in iapws97.Region2())
+
+
+
 if __name__ == '__main__':
     unittest.main()
