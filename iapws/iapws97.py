@@ -115,6 +115,13 @@ class Region(ABC):
     However, each region has a base equation from which all properties are derived, access to the necessary first and second order partial derivatives and all backwards equations.
     Further, a region must override the `__contains__` method to facilitate a `State in Region` type of query.
 
+    It is recommended that a Region calculates the properties from the data given to its constructor and stores the restuts in a `self._state` attribute. 
+    
+    The properties must be accessible via @property decorated functions that access the `self._state` attribute.
+
+    The constructor must be able to calculate the basic properties and populate the `self._state` attribute with the results and the derivatives. An instance must have 2 ways of instantiating: either giving a State or a combination of keyword argument properties that define the state.
+    It must also have the possibility to be instantiated empty (with None in all keyword arguments) so that the `State in Region1()` is easy.
+
     A Region can also have many constants at a class level if those constants are used only inside said region. Otherwise, a module level constant is favoured.
     """
     def __contains__(self, other: State) -> bool:
@@ -122,23 +129,75 @@ class Region(ABC):
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
         """
     
-    def base_eqn(self):
+    @staticmethod
+    def base_eqn(T: float, p: float):
         """
         Implements the base equation.
         """
-
+    
+    @staticmethod
+    def base_der_pi_const_tau(T: float, p: float) -> float:
+        """
+        """
+    
+    @staticmethod
+    def base_der_tau_const_pi(T: float, p: float) -> float:
+        """
+        """
+    
+    @staticmethod
+    def base_der2_pipi_const_tau(T: float, p: float) -> float:
+        """
+        """
+    
+    @staticmethod
+    def base_der_tautau_const_pi(T: float, p: float) -> float:
+        """
+        """
+    
+    @staticmethod
+    def base_der2_pitau(T: float, p: float) -> float:
+        """
+        """
+    
 class Region1(Region):
     """
     Region1 implements Region1 of the IAPWS97 standard.
 
     Methods:
+        __init__
         __contains__
         base_eqn
+        specific_gibbs_free_energy
+        base_der_pi_const_tau
+        base_der_tau_const_pi
+        base_der2_pipi_const_tau
+        base_der_tautau_const_pi
+        base_der2_pitau
 
     Class attributes:
+        table2
+        table6
+        table8
+        table2_supp
 
-    Instance attributes:
-
+        gamma
+        gamma_pi
+        gamma_tau
+        gamma_pipi
+        gamma_tautau
+        gamma_pitau
+        T
+        p
+        P
+        v
+        rho
+        u
+        s
+        h
+        cp
+        cv
+        w
     """
     table2 = {1: {'I': 0, 'J': -2, 'n': 0.146_329_712_131_67},
               18: {'I': 2, 'J': 3, 'n': -0.441_418_453_308_46e-5},
@@ -443,6 +502,21 @@ class Region1(Region):
     def gamma_pitau(self) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`"""
         return self.self._state.ders['gamma_pitau']
+
+    @property
+    def T(self) -> float:
+        """Temperature of state (K)"""
+        return self._state.T
+
+    @property
+    def p(self) -> float:
+        """Pressure of state (MPa)"""
+        return self._state.p
+
+    @property
+    def P(self) -> float:
+        """Pressure of state (MPa)"""
+        return self._state.p
 
     @property
     def v(self) -> float:
