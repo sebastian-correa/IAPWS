@@ -646,6 +646,12 @@ class Region2(Region):
         cv
         w
     """
+    # ROADMAP:
+        #Backwards (x3)
+        #Init
+        #properties
+        #Metastable region.
+
     table10 = {1: {'J': 0, 'n': -0.96927686500217e1},
                2: {'J': 1, 'n': 0.10086655968018e2},
                3: {'J': -5, 'n': -0.56087911283020e-2},
@@ -700,6 +706,41 @@ class Region2(Region):
                42: {'I': 24, 'J': 40, 'n': 0.55414715350778e-16},
                43: {'I': 24, 'J': 58, 'n': -0.94369707241210e-6}}
 
+    table_10_meta = {1: {'J': 0, 'n': -0.96937268393049e1},
+                2: {'J': 1, 'n': 0.10087275970006e2},
+                3: {'J': -5, 'n': -0.56087911283020e-2},
+                4: {'J': -4, 'n': 0.71452738081455e-1},
+                5: {'J': -3, 'n': -0.40710498223928},
+                6: {'J': -2, 'n': 0.14240819171444e1},
+                7: {'J': -1, 'n': -0.43839511319450e1},
+                8: {'J': 2, 'n': -0.28408632460772},
+                9: {'J': 3, 'n': 0.21268463753307e-1}}
+
+    table16 = {1: {'I': 1, 'J': 0, 'n': -0.73362260186506e-2},
+               2: {'I': 1, 'J': 2, 'n': -0.88223831943146e-1},
+               3: {'I': 1, 'J': 5, 'n': -0.72334555213245e-1},
+               4: {'I': 1, 'J': 11, 'n': -0.40813178534455e-2},
+               5: {'I': 2, 'J': 1, 'n': 0.20097803380207e-2},
+               6: {'I': 2, 'J': 7, 'n': -0.53045921898642e-1},
+               7: {'I': 2, 'J': 16, 'n': -0.76190409086970e-2},
+               8: {'I': 3, 'J': 4, 'n': -0.63498037657313e-2},
+               9: {'I': 3, 'J': 16, 'n': -0.86043093028588e-1},
+               10: {'I': 4, 'J': 7, 'n': 0.75321581522770e-2},
+               11: {'I': 4, 'J': 10, 'n': -0.79238375446139e-2},
+               12: {'I': 5, 'J': 9, 'n': -0.22888160778447e-3},
+               13: {'I': 5, 'J': 10, 'n': -0.26456501482810e-2}}
+
+    b23_const = {1: 0.348_051_856_289_69e3,
+                2: -0.116_718_598_799_75e1,
+                3: 0.101_929_700_393_26e-2,
+                4: 0.572_544_598_627_46e3,
+                5: 0.139_188_397_788_70e2}
+
+    b23bc_const = {1: 0.90584278514723e3,
+                   2: -0.67955786399241,
+                   3: 0.12809002730136e-3,
+                   4: 0.26526571908428e4,
+                   5: 0.45257578905948e1}
 
     def __init__(self, p: Optional[float] = None, T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
@@ -773,7 +814,8 @@ class Region2(Region):
         else:
             self._state = State()
 
-    def b23(self, p: Optional[float] = None, T: Optional[float] = None) -> float:
+    @staticmethod
+    def b23(p: Optional[float] = None, T: Optional[float] = None) -> float:
         """
         Implements the equation for the boundary between 2 and 3.
         Args:
@@ -793,6 +835,49 @@ class Region2(Region):
         else:
             raise ValueError('Pass only T or P, not both.')
 
+    @staticmethod
+    def b2bc(p:Optional[float] = None, h: Optional[float] = None) -> str:
+        """
+        Implements the equation for the boundaries in subregions of region 2.
+        Args:
+            p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            The value of p if h is given or the value of h if p is given.
+        Raises:
+            ValueError if both p and h are supplied.
+        """
+        if h is not None and p is None:
+            _pi = Region2.b23bc_const[1] + Region2.b23bc_const[2] * h + Region2.b23bc_const[3] * h**2
+            return  _pi
+        elif p is not None and h is None:
+            eta = Region2.b23bc_const[4] + np.sqrt( (p - Region2.b23bc_const[5]) / Region2.b23bc_const[3] )
+            return  eta
+        else:
+            raise ValueError('Pass only T or P, not both.')
+    
+    @staticmethod
+    def subregion(p:Optional[float] = None, h: Optional[float] = None) -> str:
+        """
+        Returns 'a', 'b' or 'c' depending on the subregion in region 2.
+        Args:
+            p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            The value of p if h is given or the value of h if p is given.
+        Raises:
+            ValueError if both p and h are supplied.
+        """
+        if p <= 4:
+            return 'a'
+        else:
+            p_calc = Region2.b2bc(h=h)
+            if p <= p_calc:
+                return 'b'
+            else:
+                return 'c'
+
+
     def __contains__(self, other: State) -> bool:
         """
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
@@ -801,7 +886,7 @@ class Region2(Region):
             return False
         else:
             cond1 = 273.15 <= other.T <= 623.15 and 0 <= other.p <= _p_s(T=other.T)
-            cond2 = 623.15 <= other.T <= 863.15 and 0 <= other.p <= self.b23(T=other.T)
+            cond2 = 623.15 <= other.T <= 863.15 and 0 <= other.p <= Region2.b23(T=other.T)
             cond3 = 863.15 <= other.T <= 1073.15 and 0 <= other.p <= 100
             return cond1 or cond2 or cond3
     

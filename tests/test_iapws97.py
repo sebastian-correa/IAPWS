@@ -99,6 +99,36 @@ class TestRegion1(unittest.TestCase):
 
 class TestRegion2(unittest.TestCase):
 
+    def test_b2bc_eq20(self):
+        h = 0.3516004323e4
+        p = 0.100_000_000e3
+
+        p_res = iapws97.Region2.b2bc(h=h)
+
+        self.assertAlmostEqual(p, p_res, places=6)
+
+    def test_b2bc_eq21(self):
+        h = 0.3516004323e4
+        p = 0.100_000_000e3
+
+        h_res = iapws97.Region2.b2bc(p=p)
+
+        self.assertAlmostEqual(h, h_res, places=6)
+    
+    def test_subregion(self):
+        # From table 24.
+        regions = {'a': {'h': [3000, 3000, 4000], 'p': [0.001, 3, 3]}, 'b': {'p': [
+            5, 5, 25], 'h': [3500, 4000, 3500]}, 'c': {'p': [40, 60, 60], 'h': [2700, 2700, 3200]}}
+
+        for reg, vals in regions.items():
+            hs = vals['h']
+            ps = vals['p']
+
+            for p, h in zip(ps, hs):
+                subregion_calc = iapws97.Region2.subregion(p=p, h=h)
+                self.assertEqual(reg, subregion_calc)
+
+
     def test_range_validity(self):
         s = iapws97.State(T=300, p=0.0035)
         s1 = iapws97.State(T=700, p=0.0035)
