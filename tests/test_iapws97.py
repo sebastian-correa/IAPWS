@@ -115,10 +115,11 @@ class TestRegion2(unittest.TestCase):
 
         self.assertAlmostEqual(h, h_res, places=6)
     
-    def test_subregion(self):
+    def test_subregion_ph(self):
         # From table 24.
-        regions = {'a': {'h': [3000, 3000, 4000], 'p': [0.001, 3, 3]}, 'b': {'p': [
-            5, 5, 25], 'h': [3500, 4000, 3500]}, 'c': {'p': [40, 60, 60], 'h': [2700, 2700, 3200]}}
+        regions = {'a': {'h': [3000, 3000, 4000], 'p': [0.001, 3, 3]},
+                   'b': {'p': [5, 5, 25], 'h': [3500, 4000, 3500]},
+                   'c': {'p': [40, 60, 60], 'h': [2700, 2700, 3200]}}
 
         for reg, vals in regions.items():
             hs = vals['h']
@@ -127,7 +128,20 @@ class TestRegion2(unittest.TestCase):
             for p, h in zip(ps, hs):
                 subregion_calc = iapws97.Region2.subregion(p=p, h=h)
                 self.assertEqual(reg, subregion_calc)
+    
+    def test_subregion_ps(self):
+        # From table 29.
+        regions = {'a': {'s': [7.5, 8, 8], 'p': [0.1, 0.1, 2.5]},
+                   'b': {'p': [8, 8, 90], 's': [6, 7.5, 6]},
+                   'c': {'p': [20, 20, 80], 's': [5.75, 5.25, 5.75]}}
 
+        for reg, vals in regions.items():
+            ss = vals['s']
+            ps = vals['p']
+
+            for p, s in zip(ps, ss):
+                subregion_calc = iapws97.Region2.subregion(p=p, s=s)
+                self.assertEqual(reg, subregion_calc)
 
     def test_range_validity(self):
         s = iapws97.State(T=300, p=0.0035)
@@ -137,6 +151,32 @@ class TestRegion2(unittest.TestCase):
         self.assertTrue(s in iapws97.Region2())
         self.assertTrue(s2 in iapws97.Region2())
         self.assertTrue(s2 in iapws97.Region2())
+
+    def test_backwards_t_ph(self):
+
+        # From table 24.
+        regions = {'a': {'h': [3000, 3000, 4000], 'p': [0.001, 3, 3], 'T': [0.534433241e3, 0.575373370e3, 0.101077577e4]},
+                   'b': {'p': [5, 5, 25], 'h': [3500, 4000, 3500], 'T': [0.801299102e3, 0.101531583e4, 0.875279054e3]},
+                   'c': {'p': [40, 60, 60], 'h': [2700, 2700, 3200], 'T': [0.743056411e3, 0.791137067e3, 0.882756860e3]}}
+
+        for reg, vals in regions.items():
+            hs = vals['h']
+            ps = vals['p']
+            ts = vals['T']
+
+            for p, h, T in zip(ps, hs, ts):
+                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
+                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
+                T_calc = iapws97.Region2().T_ph(p=p, h=h)
+                self.assertAlmostEqual(T, T_calc, places=4)
+
+    def test_backwards_t_ps(self):
+        regions = {'a': {'s': [7.5, 8, 8], 'p': [0.1, 0.1, 2.5], 'T': [0.399517097e3, 0.514127081e3, 0.103984917e4]},
+            'b': {'p': [8, 8, 90], 's': [6, 7.5, 6], 'T': [0.600484040e3, 0.106495556e4, 0.103801126e4]},
+            'c': {'p': [20, 20, 80], 's': [5.75, 5.25, 5.75], 'T': [0.697992849e3, 0.854011484e3, 0.949017998e3]}}
+    
+    def test_backwards_p_hs(self):
+        pass
 
 
 

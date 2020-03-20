@@ -742,6 +742,105 @@ class Region2(Region):
                    4: 0.26526571908428e4,
                    5: 0.45257578905948e1}
 
+    table20 = {1: {'I': 0, 'J': 0, 'n': 0.10898952318288e4},
+               2: {'I': 0, 'J': 1, 'n': 0.84951654495535e3},
+               3: {'I': 0, 'J': 2, 'n': -0.10781748091826e3},
+               4: {'I': 0, 'J': 3, 'n': 0.33153654801263e2},
+               5: {'I': 0, 'J': 7, 'n': -0.74232016790248e1},
+               6: {'I': 0, 'J': 20, 'n': 0.11765048724356e2},
+               7: {'I': 1, 'J': 0, 'n': 0.18445749355790e1},
+               8: {'I': 1, 'J': 1, 'n': -0.41792700549624e1},
+               9: {'I': 1, 'J': 2, 'n': 0.62478196935812e1},
+               10: {'I': 1, 'J': 3, 'n': -0.17344563108114e2},
+               11: {'I': 1, 'J': 7, 'n': -0.20058176862096e3},
+               12: {'I': 1, 'J': 9, 'n': 0.27196065473796e3},
+               13: {'I': 1, 'J': 11, 'n': -0.45511318285818e3},
+               14: {'I': 1, 'J': 18, 'n': 0.30919688604755e4},
+               15: {'I': 1, 'J': 44, 'n': 0.25226640357872e6},
+               16: {'I': 2, 'J': 0, 'n': -0.61707422868339e-2},
+               17: {'I': 2, 'J': 2, 'n': -0.31078046629583},
+               18: {'I': 2, 'J': 7, 'n': 0.11670873077107e2},
+               19: {'I': 2, 'J': 36, 'n': 0.12812798404046e9},
+               20: {'I': 2, 'J': 38, 'n': -0.98554909623276e9},
+               21: {'I': 2, 'J': 40, 'n': 0.28224546973002e10},
+               22: {'I': 2, 'J': 42, 'n': -0.35948971410703e10},
+               23: {'I': 2, 'J': 44, 'n': 0.17227349913197e10},
+               24: {'I': 3, 'J': 24, 'n': -0.13551334240775e5},
+               25: {'I': 3, 'J': 44, 'n': 0.12848734664650e8},
+               26: {'I': 4, 'J': 12, 'n': 0.13865724283226e1},
+               27: {'I': 4, 'J': 32, 'n': 0.23598832556514e6},
+               28: {'I': 4, 'J': 44, 'n': -0.13105236545054e8},
+               29: {'I': 5, 'J': 32, 'n': 0.73999835474766e4},
+               30: {'I': 5, 'J': 36, 'n': -0.55196697030060e6},
+               31: {'I': 5, 'J': 42, 'n': 0.37154085996233e7},
+               32: {'I': 6, 'J': 34, 'n': 0.19127729239660e5},
+               33: {'I': 6, 'J': 44, 'n': -0.41535164835634e6},
+               34: {'I': 7, 'J': 28, 'n': -0.62459855192507e2}}
+
+    table21 = {1: {'I': 0, 'J': 0, 'n': 0.14895041079516e4},
+               2: {'I': 0, 'J': 1, 'n': 0.74307798314034e3},
+               3: {'I': 0, 'J': 2, 'n': -0.97708318797837e2},
+               4: {'I': 0, 'J': 12, 'n': 0.24742464705674e1},
+               5: {'I': 0, 'J': 18, 'n': -0.63281320016026},
+               6: {'I': 0, 'J': 24, 'n': 0.11385952129658e1},
+               7: {'I': 0, 'J': 28, 'n': -0.47811863648625},
+               8: {'I': 0, 'J': 40, 'n': 0.85208123431544e-2},
+               9: {'I': 1, 'J': 0, 'n': 0.93747147377932},
+               10: {'I': 1, 'J': 2, 'n': 0.33593118604916e1},
+               11: {'I': 1, 'J': 6, 'n': 0.33809355601454e1},
+               12: {'I': 1, 'J': 12, 'n': 0.16844539671904},
+               13: {'I': 1, 'J': 18, 'n': 0.73875745236695},
+               14: {'I': 1, 'J': 24, 'n': -0.47128737436186},
+               15: {'I': 1, 'J': 28, 'n': 0.15020273139707},
+               16: {'I': 1, 'J': 40, 'n': -0.21764114219750e-2},
+               17: {'I': 2, 'J': 2, 'n': -0.21810755324761e-1},
+               18: {'I': 2, 'J': 8, 'n': -0.10829784403677},
+               19: {'I': 2, 'J': 18, 'n': -0.46333324635812e-1},
+               20: {'I': 2, 'J': 40, 'n': 0.71280351959551e-4},
+               21: {'I': 3, 'J': 1, 'n': 0.11032831789999e-3},
+               22: {'I': 3, 'J': 2, 'n': 0.18955248387902e-3},
+               23: {'I': 3, 'J': 12, 'n': 0.30891541160537e-2},
+               24: {'I': 3, 'J': 24, 'n': 0.13555504554949e-2},
+               25: {'I': 4, 'J': 2, 'n': 0.28640237477456e-6},
+               26: {'I': 4, 'J': 12, 'n': -0.10779857357512e-4},
+               27: {'I': 4, 'J': 18, 'n': -0.76462712454814e-4},
+               28: {'I': 4, 'J': 24, 'n': 0.14052392818316e-4},
+               29: {'I': 4, 'J': 28, 'n': -0.31083814331434e-4},
+               30: {'I': 4, 'J': 40, 'n': -0.10302738212103e-5},
+               31: {'I': 5, 'J': 18, 'n': 0.28217281635040e-6},
+               32: {'I': 5, 'J': 24, 'n': 0.12704902271945e-5},
+               33: {'I': 5, 'J': 40, 'n': 0.73803353468292e-7},
+               34: {'I': 6, 'J': 28, 'n': -0.11030139238909e-7},
+               35: {'I': 7, 'J': 2, 'n': -0.81456365207833e-13},
+               36: {'I': 7, 'J': 28, 'n': -0.25180545682962e-10},
+               37: {'I': 9, 'J': 1, 'n': -0.17565233969407e-17},
+               38: {'I': 9, 'J': 40, 'n': 0.86934156344163e-14}}
+
+    table22 = {1: {'I': -7, 'J': 0, 'n': -0.32368398555242e13},
+                2: {'I': -7, 'J': 4, 'n': 0.73263350902181e13},
+                3: {'I': -6, 'J': 0, 'n': 0.35825089945447e12},
+                4: {'I': -6, 'J': 2, 'n': -0.58340131851590e12},
+                5: {'I': -5, 'J': 0, 'n': -0.10783068217470e11},
+                6: {'I': -5, 'J': 2, 'n': 0.20825544563171e11},
+                7: {'I': -2, 'J': 0, 'n': 0.61074783564516e6},
+                8: {'I': -2, 'J': 1, 'n': 0.85977722535580e6},
+                9: {'I': -1, 'J': 0, 'n': -0.25745723604170e5},
+                10: {'I': -1, 'J': 2, 'n': 0.31081088422714e5},
+                11: {'I': 0, 'J': 0, 'n': 0.12082315865936e4},
+                12: {'I': 0, 'J': 1, 'n': 0.48219755109255e3},
+                13: {'I': 1, 'J': 4, 'n': 0.37966001272486e1},
+                14: {'I': 1, 'J': 8, 'n': -0.10842984880077e2},
+                15: {'I': 2, 'J': 4, 'n': -0.45364172676660e-1},
+                16: {'I': 6, 'J': 0, 'n': 0.14559115658698e-12},
+                17: {'I': 6, 'J': 1, 'n': 0.11261597407230e-11},
+                18: {'I': 6, 'J': 4, 'n': -0.17804982240686e-10},
+                19: {'I': 6, 'J': 10, 'n': 0.12324579690832e-6},
+                20: {'I': 6, 'J': 12, 'n': -0.11606921130984e-5},
+                21: {'I': 6, 'J': 16, 'n': 0.27846367088554e-4},
+                22: {'I': 6, 'J': 20, 'n': -0.59270038474176e-3},
+                23: {'I': 6, 'J': 22, 'n': 0.12918582991878e-2}}
+
+
     def __init__(self, p: Optional[float] = None, T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then the point (p, T) = (3, 300) is instanciated. This point is chosen from Table 5 as a reference point.
@@ -847,6 +946,7 @@ class Region2(Region):
         Raises:
             ValueError if both p and h are supplied.
         """
+        # TODO: Page 21 limits?
         if h is not None and p is None:
             _pi = Region2.b23bc_const[1] + Region2.b23bc_const[2] * h + Region2.b23bc_const[3] * h**2
             return  _pi
@@ -857,26 +957,38 @@ class Region2(Region):
             raise ValueError('Pass only T or P, not both.')
     
     @staticmethod
-    def subregion(p:Optional[float] = None, h: Optional[float] = None) -> str:
+    def subregion(p: float, h: Optional[float] = None, s: Optional[float] = None) -> str:
         """
-        Returns 'a', 'b' or 'c' depending on the subregion in region 2.
+        Returns 'a', 'b' or 'c' depending on the subregion in region 2 given a (p, h) or (p, s) pair.
         Args:
             p: Pressure (MPa).
             h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K)
         Returns:
-            The value of p if h is given or the value of h if p is given.
+            The subregion in region 2.
         Raises:
             ValueError if both p and h are supplied.
         """
-        if p <= 4:
-            return 'a'
-        else:
-            p_calc = Region2.b2bc(h=h)
-            if p <= p_calc:
-                return 'b'
+        #TODO: Probably check if value is in fact in region2?
+        if s is not None and h is not None:
+            raise ValueError('Only supply (p,h) or (p, s), not both p and h.')
+        elif h is not None:
+            if p <= 4:
+                return 'a'
             else:
-                return 'c'
-
+                p_calc = Region2.b2bc(h=h)
+                if p <= p_calc:
+                    return 'b'
+                else:
+                    return 'c'
+        else:
+            if p <= 4:
+                return 'a'
+            else:
+                if s >= 5.85:
+                    return 'b'
+                else:
+                    return 'c'
 
     def __contains__(self, other: State) -> bool:
         """
@@ -1153,15 +1265,22 @@ class Region2(Region):
     #############################################################
     def T_ph(self, p: float, h: float) -> float:
         """
-        Backwards equation 11 for calculating Temperature as a function of pressure and enthalpy.
+        Backwards equations 22, 23 and 23 for calculating Temperature as a function of pressure and enthalpy.
         Args:
             p: Pressure (MPa).
             h: Enthalpy (kJ/kg).
         Returns:
             Temperature (K).
         """
-        eta = h/2500
-        T = sum(entry['n'] * p**entry['I']*(eta + 1)**entry['J'] for entry in Region1.table6.values())
+        eta = h / 2000
+        reg = self.subregion(p, h=h)
+        if reg == 'a':
+            T = sum(entry['n'] * p**entry['I'] * (eta - 2.1)**entry['J'] for entry in Region2.table20.values())
+        elif reg == 'b':
+            T = sum(entry['n'] * (p - 2)**entry['I'] * (eta - 2.6)**entry['J'] for entry in Region2.table21.values())
+        elif reg == 'c':
+            T = sum(entry['n'] * (p + 25)**entry['I'] * (eta - 1.8)**entry['J'] for entry in Region2.table22.values())
+
         if State(p=p, T=T) in self:
             return T
         else:
@@ -1169,18 +1288,25 @@ class Region2(Region):
 
     def T_ps(self, p: float, s: float) -> float:
         """
-        Backwards equation 13 for calculating Temperature as a function of pressure and entropy.
+        Backwards equations 25, 26 and 27 for calculating Temperature as a function of pressure and entropy.
         Args:
             p: Pressure (MPa).
             s: Entropy (kJ/kg/K).
         Returns:
             Temperature (K).
         """
-        T = sum(entry['n'] * p**entry['I'] * (s + 2)**entry['J'] for entry in Region1.table8.values())
+        sigma = s / 2
+        reg = self.subregion(p, s=s)
+        if reg == 'a':
+            T = sum(entry['n'] * p**entry['I'] * (eta - 2.1)**entry['J'] for entry in Region2.table20.values())
+        elif reg == 'b':
+            T = sum(entry['n'] * (p - 2)**entry['I'] * (eta - 2.6)**entry['J'] for entry in Region2.table21.values())
+        elif reg == 'c':
+            T = sum(entry['n'] * (p + 25)**entry['I'] * (eta - 1.8)**entry['J'] for entry in Region2.table22.values())
+
         if State(p=p, T=T) in self:
             return T
         else:
-            #TODO: Suggest a region.
             raise ValueError(f'State out of bounds. {T}')
 
     def p_hs(self, h: float, s: float) -> float:
