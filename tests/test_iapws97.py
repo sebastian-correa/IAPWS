@@ -143,6 +143,20 @@ class TestRegion2(unittest.TestCase):
                 subregion_calc = iapws97.Region2.subregion(p=p, s=s)
                 self.assertEqual(reg, subregion_calc)
 
+    def test_subregion_hs(self):
+        # From table 29.
+        regions = {'a': {'h': [2800, 2800, 4100], 's': [6.5, 9.5, 9.5]},
+                   'b': {'h': [2800, 3600, 3600], 's': [6, 6, 7]},
+                   'c': {'h': [2800, 2800, 3400], 's': [5.1, 5.8, 5.8]}}
+
+        for reg, vals in regions.items():
+            ss = vals['s']
+            hs = vals['h']
+
+            for h, s in zip(hs, ss):
+                subregion_calc = iapws97.Region2.subregion(h=h, s=s)
+                self.assertEqual(reg, subregion_calc)
+
     def test_range_validity(self):
         s = iapws97.State(T=300, p=0.0035)
         s1 = iapws97.State(T=700, p=0.0035)

@@ -963,6 +963,9 @@ class Region2(Region):
                29: {'I': 7, 'J': 4, 'n': 0.10162166825089e-9},
                30: {'I': 7, 'J': 5, 'n': -0.16429828281347e-9}}
 
+    table5_supp = {1: -0.349898083432139e4, 2: 0.257560716905876e4,
+                   3: -0.421073558227969e3, 4: 0.276349063799944e2}
+
     def __init__(self, p: Optional[float] = None, T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then the point (p, T) = (3, 300) is instanciated. This point is chosen from Table 5 as a reference point.
@@ -1036,25 +1039,34 @@ class Region2(Region):
             self._state = State()
 
     @staticmethod
-    def b23(p: Optional[float] = None, T: Optional[float] = None) -> float:
+    def p_b23(T: float) -> float:
         """
-        Implements the equation for the boundary between 2 and 3.
+        Implements the equation for the boundary between 2 and 3 as p = p(T)
         Args:
-            p: Pressure (MPa).
             T: Temperature (K).
         Returns:
-            The value of T if p is given or the value of p is T is given.
+            The value p at the boundary between 2 and 3.
         Raises:
-            ValueError if both p and T are supplied.
+            ValueError if T is not in [623.15, 863.15]
         """
-        if T is not None and p is None:
-            _pi = b23_const[1] + b23_const[2] * T + b23_const[3] * T**2
-            return  _pi
-        elif p is not None and T is None:
-            theta = b23_const[4] + np.sqrt( (p - b23_const[5]) / b23_const[3] )
-            return  theta
-        else:
-            raise ValueError('Pass only T or P, not both.')
+        if not 623.15 <= T <= 863.15:
+            raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
+        return  b23_const[1] + b23_const[2] * T + b23_const[3] * T**2
+    
+    @staticmethod
+    def T_b23(p: float) -> float:
+        """
+        Implements the equation for the boundary between 2 and 3 as T = T(p)
+        Args:
+            p: Pressure (MPa).
+        Returns:
+            The value T at the boundary between 2 and 3.
+        Raises:
+            ValueError if p is not in [16.5292, 100]
+        """
+        if not 16.5292 <= p <= 100:
+            raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
+        return  b23_const[4] + np.sqrt( (p - b23_const[5]) / b23_const[3] )
 
     @staticmethod
     def b2bc(p:Optional[float] = None, h: Optional[float] = None) -> str:
@@ -1079,9 +1091,21 @@ class Region2(Region):
             raise ValueError('Pass only T or P, not both.')
     
     @staticmethod
-    def subregion(p: float, h: Optional[float] = None, s: Optional[float] = None) -> str:
+    def h_2ab(s: float) -> float:
         """
-        Returns 'a', 'b' or 'c' depending on the subregion in region 2 given a (p, h) or (p, s) pair.
+        Used to determine wheter to use region 2a or 2b. Eq.2 from supplementary release.
+        Args:
+            s: Entryopy (kJ/kg/K)
+        Returns:
+            The value of the enthalpy in region 2 for a given entropy.
+        """
+        return Region2.table5_supp[1] + Region2.table5_supp[2] * s + Region2.table5_supp[3] * s**2 + Region2.table5_supp[4] * s**3
+ 
+
+    @staticmethod
+    def subregion(p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> str:
+        """
+        Returns 'a', 'b' or 'c' depending on the subregion in region 2 given a (p, h), (p, s) or (h, s) pair.
         Args:
             p: Pressure (MPa).
             h: Enthalpy (kJ/kg).
@@ -1089,12 +1113,19 @@ class Region2(Region):
         Returns:
             The subregion in region 2.
         Raises:
-            ValueError if both p and h are supplied.
+            ValueError if an erroneous pair is provided.
         """
         #TODO: Probably check if value is in fact in region2?
-        if s is not None and h is not None:
-            raise ValueError('Only supply (p,h) or (p, s), not both p and h.')
-        elif h is not None:
+        if h is not None and s is not None and p is None:
+            if s < 5.85:
+                return 'c'
+            else:
+                h_calc = Region2.h_2ab(s)
+                if h <= h_calc:
+                    return 'a'
+                else:
+                    return 'b'
+        elif h is not None and p is not None and s is None:
             if p <= 4:
                 return 'a'
             else:
@@ -1103,7 +1134,7 @@ class Region2(Region):
                     return 'b'
                 else:
                     return 'c'
-        else:
+        elif s is not None and p is not None and h is None:
             if p <= 4:
                 return 'a'
             else:
@@ -1111,6 +1142,8 @@ class Region2(Region):
                     return 'b'
                 else:
                     return 'c'
+        else:
+            raise ValueError('Please supply only one of the following data pairs: (p, h), (p, s) or (h, s).')
 
     def __contains__(self, other: State) -> bool:
         """
@@ -1119,9 +1152,10 @@ class Region2(Region):
         if not isinstance(other, State):
             return False
         else:
-            cond1 = 273.15 <= other.T <= 623.15 and 0 <= other.p <= _p_s(T=other.T)
-            cond2 = 623.15 <= other.T <= 863.15 and 0 <= other.p <= Region2.b23(T=other.T)
-            cond3 = 863.15 <= other.T <= 1073.15 and 0 <= other.p <= 100
+            # Lower bounds for p from page 5 of Revised Supplementary Release on Backward Equations for Pressure as a Function of Enthalpy and Entropy p(h,s) for Regions 1 and 2 of the IAPWS...
+            cond1 = 273.15 <= other.T <= 623.15 and 611.213e-6 <= other.p <= _p_s(T=other.T)
+            cond2 = 623.15 <= other.T <= 863.15 and 611.213e-6 <= other.p <= Region2.p_b23(T=other.T)
+            cond3 = 863.15 <= other.T <= 1073.15 and 611.213e-6 <= other.p <= 100
             return cond1 or cond2 or cond3
     
     @staticmethod
@@ -1395,7 +1429,7 @@ class Region2(Region):
             Temperature (K).
         """
         eta = h / 2000
-        reg = self.subregion(p, h=h)
+        reg = self.subregion(p=p, h=h)
         if reg == 'a':
             T = sum(entry['n'] * p**entry['I'] * (eta - 2.1)**entry['J'] for entry in Region2.table20.values())
         elif reg == 'b':
@@ -1417,7 +1451,7 @@ class Region2(Region):
         Returns:
             Temperature (K).
         """
-        reg = self.subregion(p, s=s)
+        reg = self.subregion(p=p, s=s)
         if reg == 'a':
             sigma = s / 2
             T = sum(entry['n'] * p**entry['I'] * (sigma - 2)**entry['J'] for entry in Region2.table25.values())
