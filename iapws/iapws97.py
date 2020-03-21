@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Optional, Dict
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
 
@@ -111,46 +111,17 @@ class Region(ABC):
 
     A Region can also have many constants at a class level if those constants are used only inside said region. Otherwise, a module level constant is favoured.
     """
+    @abstractmethod
     def __contains__(self, other: State) -> bool:
         """
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
         """
     
+    @abstractmethod
     @staticmethod
     def base_eqn(T: float, p: float):
         """
         Implements the base equation.
-        """
-    
-    @staticmethod
-    def base_der_pi_const_tau(T: float, p: float) -> float:
-        """Derivative of `base_eqn` with respect to `pi` with consant `tau`.
-        Also known as gamma_pi.
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
-        """
-    
-    @staticmethod
-    def base_der_tau_const_pi(T: float, p: float) -> float:
-        """
-        """
-    
-    @staticmethod
-    def base_der2_pipi_const_tau(T: float, p: float) -> float:
-        """
-        """
-    
-    @staticmethod
-    def base_der_tautau_const_pi(T: float, p: float) -> float:
-        """
-        """
-    
-    @staticmethod
-    def base_der2_pitau(T: float, p: float) -> float:
-        """
         """
     
 class Region1(Region):
@@ -647,7 +618,6 @@ class Region2(Region):
         w
     """
     # ROADMAP:
-        #@propertites for ders.
         #TODO: Metastable region.
 
     table10 = {1: {'J': 0, 'n': -0.96927686500217e1},
@@ -1455,9 +1425,6 @@ class Region2(Region):
     def gammaR(self) -> float:
         """Dimensionless specific Gibbs free energy residual (eq. 17)."""
         return self._state.ders['gammaO']
-
-gammaO_tautau=gttO, gammaR_tautau=gttR, gamma_tautau=gtt,
-gammaO_pitau=gptO, gammaR_pitau=gptR, gamma_pitau=gpt)
 
     @property
     def gamma_pi(self) -> float:

@@ -216,7 +216,6 @@ class TestRegion2(unittest.TestCase):
                 p_calc = iapws97.Region2().p_hs(h=h, s=s)
                 self.assertAlmostEqual(p, p_calc, places=4)
 
-
     def test_property_accuracy(self):
         """Test the results from Table 15."""
         s = iapws97.State(T=300, p=0.0035)
