@@ -647,10 +647,8 @@ class Region2(Region):
         w
     """
     # ROADMAP:
-        #Backwards (x3)
-        #Init
-        #properties
-        #Metastable region.
+        #@propertites for ders.
+        #TODO: Metastable region.
 
     table10 = {1: {'J': 0, 'n': -0.96927686500217e1},
                2: {'J': 1, 'n': 0.10086655968018e2},
@@ -663,48 +661,48 @@ class Region2(Region):
                9: {'J': 3, 'n': 0.21268463753307e-1}}
 
     table11 = {1: {'I': 1, 'J': 0, 'n': -0.17731742473213e-2},
-               2: {'I': 1, 'J': 1, 'n': -0.17834862292358e-1},
-               3: {'I': 1, 'J': 2, 'n': -0.45996013696365e-1},
-               4: {'I': 1, 'J': 3, 'n': -0.57581259083432e-1},
-               5: {'I': 1, 'J': 6, 'n': -0.50325278727930e-1},
-               6: {'I': 2, 'J': 1, 'n': -0.33032641670203e-4},
-               7: {'I': 2, 'J': 2, 'n': -0.18948987516315e-3},
-               8: {'I': 2, 'J': 4, 'n': -0.39392777243355e-2},
-               9: {'I': 2, 'J': 7, 'n': -0.43797295650573e-1},
-               10: {'I': 2, 'J': 36, 'n': -0.26674547914087e-4},
-               11: {'I': 3, 'J': 0, 'n': 0.20481737692309e-7},
-               12: {'I': 3, 'J': 1, 'n': 0.43870667284435e-6},
-               13: {'I': 3, 'J': 3, 'n': -0.32277677238570e-4},
-               14: {'I': 3, 'J': 6, 'n': -0.15033924542148e-2},
-               15: {'I': 3, 'J': 35, 'n': -0.40668253562649e-1},
-               16: {'I': 4, 'J': 1, 'n': -0.78847309559367e-9},
-               17: {'I': 4, 'J': 2, 'n': 0.12790717852285e-7},
-               18: {'I': 4, 'J': 3, 'n': 0.48225372718507e-6},
-               19: {'I': 5, 'J': 7, 'n': 0.22922076337661e-5},
-               20: {'I': 6, 'J': 3, 'n': -0.16714766451061e-10},
-               21: {'I': 6, 'J': 16, 'n': -0.21171472321355e-2},
-               22: {'I': 6, 'J': 35, 'n': -0.23895741934104e2},
-               23: {'I': 7, 'J': 0, 'n': -0.59059564324270e-17},
-               24: {'I': 7, 'J': 11, 'n': -0.12621808899101e-5},
-               25: {'I': 7, 'J': 25, 'n': -0.38946842435739e-1},
-               26: {'I': 8, 'J': 8, 'n': 0.11256211360459e-10},
-               27: {'I': 8, 'J': 36, 'n': -0.82311340897998e1},
-               28: {'I': 9, 'J': 13, 'n': 0.19809712802088e-7},
-               29: {'I': 10, 'J': 4, 'n': 0.10406965210174e-18},
-               30: {'I': 10, 'J': 10, 'n': -0.10234747095929e-12},
-               31: {'I': 10, 'J': 14, 'n': -0.10018179379511e-8},
-               32: {'I': 16, 'J': 29, 'n': -0.80882908646985e-10},
-               33: {'I': 16, 'J': 50, 'n': 0.10693031879409},
-               34: {'I': 18, 'J': 57, 'n': -0.33662250574171},
-               35: {'I': 20, 'J': 20, 'n': 0.89185845355421e-24},
-               36: {'I': 20, 'J': 35, 'n': 0.30629316876232e-12},
-               37: {'I': 20, 'J': 48, 'n': -0.42002467698208e-5},
-               38: {'I': 21, 'J': 21, 'n': -0.59056029685639e-25},
-               39: {'I': 22, 'J': 53, 'n': 0.37826947613457e-5},
-               40: {'I': 23, 'J': 39, 'n': -0.12768608934681e-14},
-               41: {'I': 24, 'J': 26, 'n': 0.73087610595061e-28},
-               42: {'I': 24, 'J': 40, 'n': 0.55414715350778e-16},
-               43: {'I': 24, 'J': 58, 'n': -0.94369707241210e-6}}
+                2: {'I': 1, 'J': 1, 'n': -0.17834862292358e-1},
+                3: {'I': 1, 'J': 2, 'n': -0.45996013696365e-1},
+                4: {'I': 1, 'J': 3, 'n': -0.57581259083432e-1},
+                5: {'I': 1, 'J': 6, 'n': -0.50325278727930e-1},
+                6: {'I': 2, 'J': 1, 'n': -0.33032641670203e-4},
+                7: {'I': 2, 'J': 2, 'n': -0.18948987516315e-3},
+                8: {'I': 2, 'J': 4, 'n': -0.39392777243355e-2},
+                9: {'I': 2, 'J': 7, 'n': -0.43797295650573e-1},
+                10: {'I': 2, 'J': 36, 'n': -0.26674547914087e-4},
+                11: {'I': 3, 'J': 0, 'n': 0.20481737692309e-7},
+                12: {'I': 3, 'J': 1, 'n': 0.43870667284435e-6},
+                13: {'I': 3, 'J': 3, 'n': -0.32277677238570e-4},
+                14: {'I': 3, 'J': 6, 'n': -0.15033924542148e-2},
+                15: {'I': 3, 'J': 35, 'n': -0.40668253562649e-1},
+                16: {'I': 4, 'J': 1, 'n': -0.78847309559367e-9},
+                17: {'I': 4, 'J': 2, 'n': 0.12790717852285e-7},
+                18: {'I': 4, 'J': 3, 'n': 0.48225372718507e-6},
+                19: {'I': 5, 'J': 7, 'n': 0.22922076337661e-5},
+                20: {'I': 6, 'J': 3, 'n': -0.16714766451061e-10},
+                21: {'I': 6, 'J': 16, 'n': -0.21171472321355e-2},
+                22: {'I': 6, 'J': 35, 'n': -0.23895741934104e2},
+                23: {'I': 7, 'J': 0, 'n': -0.59059564324270e-17},
+                24: {'I': 7, 'J': 11, 'n': -0.12621808899101e-5},
+                25: {'I': 7, 'J': 25, 'n': -0.38946842435739e-1},
+                26: {'I': 8, 'J': 8, 'n': 0.11256211360459e-10},
+                27: {'I': 8, 'J': 36, 'n': -0.82311340897998e1},
+                28: {'I': 9, 'J': 13, 'n': 0.19809712802088e-7},
+                29: {'I': 10, 'J': 4, 'n': 0.10406965210174e-18},
+                30: {'I': 10, 'J': 10, 'n': -0.10234747095929e-12},
+                31: {'I': 10, 'J': 14, 'n': -0.10018179379511e-8},
+                32: {'I': 16, 'J': 29, 'n': -0.80882908646985e-10},
+                33: {'I': 16, 'J': 50, 'n': 0.10693031879409},
+                34: {'I': 18, 'J': 57, 'n': -0.33662250574171},
+                35: {'I': 20, 'J': 20, 'n': 0.89185845355421e-24},
+                36: {'I': 20, 'J': 35, 'n': 0.30629316876232e-12},
+                37: {'I': 20, 'J': 48, 'n': -0.42002467698208e-5},
+                38: {'I': 21, 'J': 21, 'n': -0.59056029685639e-25},
+                39: {'I': 22, 'J': 53, 'n': 0.37826947613457e-5},
+                40: {'I': 23, 'J': 39, 'n': -0.12768608934681e-14},
+                41: {'I': 24, 'J': 26, 'n': 0.73087610595061e-28},
+                42: {'I': 24, 'J': 40, 'n': 0.55414715350778e-16},
+                43: {'I': 24, 'J': 58, 'n': -0.94369707241210e-6}}
 
     table_10_meta = {1: {'J': 0, 'n': -0.96937268393049e1},
                 2: {'J': 1, 'n': 0.10087275970006e2},
@@ -1108,28 +1106,45 @@ class Region2(Region):
         
         
         if calc:
-            tau = 1386 / T
-            _pi = p / 16.53
+            tau = 540 / T
+            _pi = p / 1
 
             if not self._state in self:
                 # Find region number and return it.
                 pass
 
-            gg = Region1.base_eqn(T=T, p=p)
-            gp = Region1.base_der_pi_const_tau(T=T, p=p)
-            gt = Region1.base_der_tau_const_pi(T=T, p=p)
-            gpp = Region1.base_der2_pipi_const_tau(T=T, p=p)
-            gtt = Region1.base_der2_tautau_const_pi(T=T, p=p)
-            gpt = Region1.base_der2_pitau(T=T, p=p)
+            ggO, ggR = Region2.base_eqn_id_gas(T=T, p=p), Region2.base_eqn_residual(T=T, p=p)
+            gg = ggO + ggR
+
+            gpO, gpR = Region2.base_id_gas_der_pi_const_tau(T=T, p=p), Region2.base_residual_der_pi_const_tau(T=T, p=p)
+            gp = gpO + gpR
+
+            gtO, gtR = Region2.base_id_gas_der_tau_const_pi(T=T, p=p), Region2.base_residual_der_tau_const_pi(T=T, p=p)
+            gt = gtO + gtR
+
+            gppO, gppR = Region2.base_id_gas_der2_pipi_const_tau(T=T, p=p), Region2.base_residual_der2_pipi_const_tau(T=T, p=p)
+            gpp = gppO + gppR
+
+            gttO, gttR = Region2.base_id_gas_der2_tautau_const_pi(T=T, p=p), Region2.base_residual_der2_tautau_const_pi(T=T, p=p)
+            gtt = gttO + gttR
+
+            gptO, gptR = Region2.base_id_gas_der2_pitau(T=T, p=p), Region2.base_residual_der2_pitau(T=T, p=p)
+            gpt = gptO + gptR
             
-            self._state.ders = defaultdict(float, gamma=gg, gamma_pi=gp, gamma_tau=gt, gamma_pipi=gpp, gamma_tautau=gtt, gamma_pitau=gpt)
+            self._state.ders = defaultdict(float,
+                                           gammaO=ggO, gammaR=ggR, gamma=gg,
+                                           gammaO_pi=gpO, gammaR_pi=gpO, gamma_pi=gp,
+                                           gammaO_tau=gtO, gammaR_tau=gtR, gamma_tau=gt,
+                                           gammaO_pipi=gppO, gammaR_pipi=gppR, gamma_pipi=gpp,
+                                           gammaO_tautau=gttO, gammaR_tautau=gttR, gamma_tautau=gtt,
+                                           gammaO_pitau=gptO, gammaR_pitau=gptR, gamma_pitau=gpt)
 
             self._state.v = _pi * gp * R * T / p / 1000  # R*T/p has units of 1000 m^3/kg.
             self._state.u = R * T * (tau*gt - _pi*gp)
             self._state.s = state.s if state.s is not None else R * (tau*gt - gg)
             self._state.h = state.h if state.h is not None else R * T * tau * gt
             self._state.cp = R * -tau**2 * gtt
-            self._state.cv = R * (-tau**2 * gtt + (gp-tau*gpt)**2 / gpp)
+            self._state.cv = R * (-tau**2 * gtt - (1 + _pi * gpR - tau * _pi * gptR)**2 / (1 - _pi**2 * gppR))
             self._state.w = np.sqrt(1000 * R * T * gp**2 / ((gp-tau*gpt)**2 / (tau**2 * gtt) - gpp))  # 1000 is a conversion factor: sqrt(kJ/kg) = sqrt(1000 m/s) -> sqrt(1000) m/s
         else:
             self._state = State()
@@ -1286,7 +1301,7 @@ class Region2(Region):
     @staticmethod
     def base_eqn_residual(T: float, p: float) -> float:
         """
-        Residual part (`gammaO`) of the dimensionless Gibbs free energy.
+        Residual part (`gammaR`) of the dimensionless Gibbs free energy.
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
@@ -1310,7 +1325,20 @@ class Region2(Region):
             Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
         """
         return 1/p
-    
+
+    @staticmethod
+    def base_residual_der_pi_const_tau(T: float, p: float) -> float:
+        """Derivative of residual of dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
+        Also known as gammaR_pi.
+        Args:
+            T: Temperature (K)
+            p: Pressure (MPa)
+        Returns:
+            Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
+        """
+        tau = 540 / T
+        return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
+
     @staticmethod
     def base_id_gas_der_tau_const_pi(T: float, p: float) -> float:
         """Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `tau` with consant `pi`
@@ -1325,27 +1353,14 @@ class Region2(Region):
         return sum(entry['n'] * entry['J'] * tau**(entry['J'] - 1) for entry in Region2.table10.values())
     
     @staticmethod
-    def base_residual_der_pi_const_tau(T: float, p: float) -> float:
-        """Derivative of residual of dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
-        Also known as gammaR_pi.
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Derivative of residual part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
-        """
-        tau = 540 / T
-        return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
-    
-    @staticmethod
     def base_residual_der_tau_const_pi(T: float, p: float) -> float:
-        """Derivative of residual part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `tau` with consant `pi`
+        """Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
         Also known as gammaR_tau.
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Derivative of residual part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `tau` with consant `pi`
+            Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
         return sum(entry['n'] * p**entry['I'] * entry['J'] * (tau - 0.5)**(entry['J'] - 1) for entry in Region2.table11.values())
@@ -1389,36 +1404,36 @@ class Region2(Region):
 
     @staticmethod
     def base_residual_der2_pipi_const_tau(T: float, p: float) -> float:
-        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
+        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
+            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
         """
         tau = 540 / T
         return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * p **(entry['I'] - 2) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
     
     @staticmethod
     def base_residual_der2_tautau_const_pi(T: float, p: float) -> float:
-        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
-        return sum(entry['n'] * p**entry['I'] * entry['J'] * (entry['J'] - 1) (tau - 0.5)**(entry['J'] - 2) for entry in Region2.table11.values())
+        return sum(entry['n'] * p**entry['I'] * entry['J'] * (entry['J'] - 1) * (tau - 0.5)**(entry['J'] - 2) for entry in Region2.table11.values())
     
     @staticmethod
     def base_residual_der2_pitau(T: float, p: float) -> float:
-        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
+        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` and then `tau`
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
+            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` and then `tau`
         """
         tau = 540 / T
         return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * entry['J'] * (tau - 0.5)**(entry['J'] - 1) for entry in Region2.table11.values())
@@ -1428,13 +1443,36 @@ class Region2(Region):
     #############################################################
     @property
     def gamma(self) -> float:
-        """Dimensionless specific Gibbs free energy (eq. 7)."""
+        """Dimensionless specific Gibbs free energy (eq. 15)."""
         return self._state.ders['gamma']
+
+    @property
+    def gammaO(self) -> float:
+        """Dimensionless specific Gibbs free energy ideal gas(eq. 16)."""
+        return self._state.ders['gammaO']
+    
+    @property
+    def gammaR(self) -> float:
+        """Dimensionless specific Gibbs free energy residual (eq. 17)."""
+        return self._state.ders['gammaO']
+
+gammaO_tautau=gttO, gammaR_tautau=gttR, gamma_tautau=gtt,
+gammaO_pitau=gptO, gammaR_pitau=gptR, gamma_pitau=gpt)
 
     @property
     def gamma_pi(self) -> float:
         """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`"""
         return self._state.ders['gamma_pi']
+    
+    @property
+    def gammaO_pi(self) -> float:
+        """Ideal gas part of the derivative of gamma with respect to pi."""
+        return self._state.ders['gammaO_pi']
+
+    @property
+    def gammaR_pi(self) -> float:
+        """Residual part of the derivative of gamma with respect to pi."""
+        return self._state.ders['gammaR_pi']
 
     @property
     def gamma_tau(self) -> float:
@@ -1442,19 +1480,58 @@ class Region2(Region):
         return self._state.ders['gamma_tau']
 
     @property
+    def gammaO_tau(self) -> float:
+        """Ideal gas part of the derivative of gamma with respect to tau."""
+        return self._state.ders['gammaO_tau']
+
+    @property
+    def gammaR_tau(self) -> float:
+        """Residual part of the derivative of gamma with respect to tau."""
+        return self._state.ders['gammaR_tau']
+
+    @property
     def gamma_pipi(self) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`"""
         return self.self._state.ders['gamma_pipi']
 
     @property
+    def gammaO_pipi(self) -> float:
+        """Ideal gas part of the second order derivative of gamma with respect to pi twice."""
+        return self.self._state.ders['gammaO_pipi']
+
+    @property
+    def gammaR_pipi(self) -> float:
+        """Residual part of the second order derivative of gamma with respect to pi twice."""
+        return self.self._state.ders['gammaR_pipi']
+
+    @property
     def gamma_tautau(self) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`"""
         return self.self._state.ders['gamma_tautau']
+    
+    @property
+    def gammaO_tautau(self) -> float:
+        """Idel gas part of the second order derivative of gamma with respect to pi twice."""
+        return self.self._state.ders['gammaO_tautau']
+    @property
+    def gammaR_tautau(self) -> float:
+        """Residual part of the second order derivative of gamma with respect to tau twice."""
+        return self.self._state.ders['gammaR_tautau']
 
     @property
     def gamma_pitau(self) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`"""
         return self.self._state.ders['gamma_pitau']
+
+    @property
+    def gammaO_pitau(self) -> float:
+        """Ideal gas part of the second order derivative of gamma with respect to pi and then tau."""
+        return self.self._state.ders['gammaO_pitau']
+
+    @property
+    def gammaR_pitau(self) -> float:
+        """Residual part of the second order derivative of gamma with respect to pi and then tau."""
+        return self.self._state.ders['gammaR_pitau']
 
     @property
     def T(self) -> float:

@@ -217,5 +217,25 @@ class TestRegion2(unittest.TestCase):
                 self.assertAlmostEqual(p, p_calc, places=4)
 
 
+    def test_property_accuracy(self):
+        """Test the results from Table 15."""
+        s = iapws97.State(T=300, p=0.0035)
+        s1 = iapws97.State(T=700, p=0.0035)
+        s2 = iapws97.State(T=700, p=30)
+        states = [s, s1, s2]
+
+        table15 = np.array([[0.394913866e2, 0.923015898e2, 0.542946619e-2],
+                           [0.254991145e4, 0.333568375e4, 0.263149474e4],
+                           [0.241169160e4, 0.301262819e4, 0.246861076e4],
+                           [0.852238967e1, 0.101749996e2, 0.517540298e1],
+                           [0.191300162e1, 0.208141274e1, 0.103505092e2],
+                           [0.427920172e3, 0.644289068e3, 0.480386523e3]])
+        table15 = table15.T
+
+        for state, properties in zip(states, table15):
+            r = iapws97.Region2(state=state)
+            p = [r.v, r.h, r.u, r.s, r.cp, r.w]
+            np.testing.assert_almost_equal(properties, p, decimal=5)
+
 if __name__ == '__main__':
     unittest.main()
