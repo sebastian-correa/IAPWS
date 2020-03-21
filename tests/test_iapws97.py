@@ -200,8 +200,21 @@ class TestRegion2(unittest.TestCase):
                 self.assertAlmostEqual(T, T_calc, places=4)
     
     def test_backwards_p_hs(self):
-        pass
+        # From table 9 of supplement for p(h,s).
+        regions = {'a': {'h': [2800, 2800, 4100], 's': [6.5, 9.5, 9.5], 'p': [1.371012767, 1.879743844e-3, 1.024788997e-1]},
+                   'b': {'h': [2800, 3600, 3600], 's': [6, 6, 7], 'p': [4.793911442, 8.395519209e1, 7.527161441]},
+                   'c': {'h': [2800, 2800, 3400], 's': [5.1, 5.8, 5.8], 'p': [9.439202060e1, 8.414574124, 8.376903879e1]}}
+        
+        for reg, vals in regions.items():
+            ss = vals['s']
+            ps = vals['p']
+            hs = vals['h']
 
+            for p, h, s in zip(ps, hs, ss):
+                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
+                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
+                p_calc = iapws97.Region2().p_hs(h=h, s=s)
+                self.assertAlmostEqual(p, p_calc, places=4)
 
 
 if __name__ == '__main__':
