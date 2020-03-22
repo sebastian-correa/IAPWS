@@ -265,7 +265,7 @@ class Region3(Region):
     ################## FIRST ORDER DERIVATIVES ##################
     #############################################################
     @staticmethod
-    def base_der_delta_const_tau(T: float, p: float) -> float:
+    def base_der_delta_const_tau(T: float, rho: float) -> float:
         """Derivative of dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`
         Also known as phi_delta.
         Args:
@@ -281,7 +281,7 @@ class Region3(Region):
         return other_term + _sum
 
     @staticmethod
-    def base_der_tau_const_delta(T: float, p: float) -> float:
+    def base_der_tau_const_delta(T: float, rho: float) -> float:
         """Derivative of dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`
         Also known as phi_tau.
         Args:
@@ -299,38 +299,47 @@ class Region3(Region):
     ################# SECOND ORDER DERIVATIVES ##################
     #############################################################
     @staticmethod
-    def base_der2_pipi_const_tau(T: float, p: float) -> float:
-        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
+    def base_der2_deltadelta_const_tau(T: float, rho: float) -> float:
+        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`
         Args:
             T: Temperature (K)
-            p: Pressure (MPa)
+            rho: rho (kg/m^3)
         Returns:
-            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
+            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`
         """
-        return -1/p**2
+        delta = rho / rho_c
+        tau = T / T_c
+        _sum = sum(entry['n'] * entry['I'] * (entry['I'] - 1) * delta**(entry['I'] - 2) * tau**entry['J'] for entry in Region3.table30.values() if entry['I'] is not None)
+        other_term = - Region3.table30[1]['n'] / delta**2
+        return other_term + _sum
     
     @staticmethod
-    def base_der2_tautau_const_pi(T: float, p: float) -> float:
-        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`
+    def base_der2_tautau_const_pi(T: float, rho: float) -> float:
+        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`
         Args:
             T: Temperature (K)
-            p: Pressure (MPa)
+            rho: rho (kg/m^3)
         Returns:
-            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`
+            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`
         """
-        tau = 540 / T
-        return sum(entry['n'] * entry['J'] * (entry['J'] -1) * tau**(entry['J'] - 2) for entry in Region2.table10.values())
+        delta = rho / rho_c
+        tau = T / T_c
+        _sum = sum(entry['n'] * delta**entry['I'] * entry['J'] * (entry['J'] - 1) * tau**(entry['J'] - 2) for entry in Region3.table30.values() if entry['I'] is not None)
+        return _sum
     
     @staticmethod
-    def base_der2_pitau(T: float, p: float) -> float:
-        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` and then `tau`
+    def base_der2_deltatau(T: float, rho: float) -> float:
+        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` and then `tau`
         Args:
             T: Temperature (K)
-            p: Pressure (MPa)
+            rho: rho (kg/m^3)
         Returns:
-            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` and then `tau`
+            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` and then `tau`
         """
-        return 0
+        delta = rho / rho_c
+        tau = T / T_c
+        _sum = sum(entry['n'] * entry['I'] * delta**(entry['I'] - 1) * entry['J'] * tau**(entry['J'] - 1) for entry in Region3.table30.values() if entry['I'] is not None)
+        return _sum
 
     #############################################################
     ####################### Properties ##########################
