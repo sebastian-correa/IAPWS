@@ -265,29 +265,35 @@ class Region3(Region):
     ################## FIRST ORDER DERIVATIVES ##################
     #############################################################
     @staticmethod
-    def base_der_pi_const_tau(T: float, p: float) -> float:
-        """Derivative of Ideal gas part of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
-        Also known as phi_pi.
+    def base_der_delta_const_tau(T: float, p: float) -> float:
+        """Derivative of dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`
+        Also known as phi_delta.
         Args:
             T: Temperature (K)
-            p: Pressure (MPa)
+            rho: rho (kg/m^3)
         Returns:
-            Derivative of Ideal gas part of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
+            Derivative of Ideal gas part of dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`
         """
-        return 1/p
+        delta = rho / rho_c
+        tau = T / T_c
+        _sum = sum(entry['n'] * entry['I'] * delta**(entry['I'] - 1) * tau**entry['J'] for entry in Region3.table30.values() if entry['I'] is not None)
+        other_term = Region3.table30[1]['n'] / delta
+        return other_term + _sum
 
     @staticmethod
-    def base_der_pi_const_tau(T: float, p: float) -> float:
-        """Derivative of residual of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
-        Also known as phi_pi.
+    def base_der_tau_const_delta(T: float, p: float) -> float:
+        """Derivative of dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`
+        Also known as phi_tau.
         Args:
             T: Temperature (K)
-            p: Pressure (MPa)
+            rho: rho (kg/m^3)
         Returns:
-            Derivative of residual part of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
+            Derivative of Ideal gas part of dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`
         """
-        tau = 540 / T
-        return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
+        delta = rho / rho_c
+        tau = T / T_c
+        _sum = sum(entry['n'] * delta**entry['I'] * entry['J'] * tau**(entry['J'] - 1) for entry in Region3.table30.values() if entry['I'] is not None)
+        return _sum
 
     #############################################################
     ################# SECOND ORDER DERIVATIVES ##################
