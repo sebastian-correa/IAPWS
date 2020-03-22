@@ -7,23 +7,12 @@ from ._utils import State, Region, R, _p_s
 class Region2(Region):
     """
     Region2 implements Region2 of the IAPWS97 standard.
-
+    #TODO: Update this.
     Methods:
-        __init__
-        __contains__
-        base_eqn
-        specific_gibbs_free_energy
-        base_der_pi_const_tau
-        base_der_tau_const_pi
-        base_der2_pipi_const_tau
-        base_der_tautau_const_pi
-        base_der2_pitau
+
 
     Class attributes:
-        table2
-        table6
-        table8
-        table2_supp
+
 
         gamma
         gamma_pi
