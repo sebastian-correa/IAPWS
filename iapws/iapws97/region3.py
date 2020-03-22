@@ -67,11 +67,12 @@ class Region3(Region):
                39: {'I': 10, 'J': 1, 'n': -0.16557679795037e-3},
                40: {'I': 11, 'J': 26, 'n': -0.44923899061815e-4}}
 
+    table1_supp = {1: 0.201_464_004_206_875e4, 2: 0.374_696_550_136_983e1, 3: -0.219_921_901_054_187e-1, 4: 0.875_131_686_009_950e-4}
 
 
-    def __init__(self, p: Optional[float] = None, T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
+    def __init__(self, T: Optional[float] = None, rho: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
-        If all parameters are None (their default), then the point (p, T) = (3, 300) is instanciated. This point is chosen from Table 5 as a reference point.
+        If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region3` check can be performed easily.
         """
         params = [p, T, h, s]
         if state is not None and all(param is None for param in params):
@@ -186,45 +187,41 @@ class Region3(Region):
         return  Region3.b23_const[4] + np.sqrt( (p - Region3.b23_const[5]) / Region3.b23_const[3] )
 
     @staticmethod
+    def h_3ab(p: float) -> float:
+        """
+        Used to determine wheter to use region 3a or 3b. Eq.1 from supplementary release.
+        Args:
+            p: Pressure (MPa)
+        Returns:
+            The value of the enthalpy in region 2 for a given pressure.
+        """
+        return Region3.table1_supp[1] + Region3.table1_supp[2] * p + Region3.table1_supp[3] * p**2 + Region3.table1_supp[4] * p**3
+
+    @staticmethod
     def subregion(p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> str:
         """
-        Returns 'a', 'b' or 'c' depending on the subregion in region 2 given a (p, h), (p, s) or (h, s) pair.
+        Returns 'a' or 'b' depending on the subregion in region 3 given a (p, h), (p, s) or (h, s) pair.
         Args:
             p: Pressure (MPa).
             h: Enthalpy (kJ/kg).
             s: Entropy (kJ/kg/K)
         Returns:
-            The subregion in region 2.
+            The subregion in region 3.
         Raises:
             ValueError if an erroneous pair is provided.
         """
-        #TODO: Probably check if value is in fact in region2?
-        if h is not None and s is not None and p is None:
-            if s < 5.85:
-                return 'c'
+        #TODO: Probably check if value is in fact in region3?
+        if (s is not None and h is not None and p is None) or (s is not None and p is not None and h is None):
+            if s >= 4.41202148223476:
+                return 'b'
             else:
-                h_calc = Region2.h_2ab(s)
-                if h <= h_calc:
-                    return 'a'
-                else:
-                    return 'b'
+                return 'a'
         elif h is not None and p is not None and s is None:
-            if p <= 4:
+            h_calc = Region3.h_3ab(p=p)
+            if h <= h_calc:
                 return 'a'
             else:
-                p_calc = Region2.b2bc(h=h)
-                if p <= p_calc:
-                    return 'b'
-                else:
-                    return 'c'
-        elif s is not None and p is not None and h is None:
-            if p <= 4:
-                return 'a'
-            else:
-                if s >= 5.85:
-                    return 'b'
-                else:
-                    return 'c'
+                return 'b'
         else:
             raise ValueError('Please supply only one of the following data pairs: (p, h), (p, s) or (h, s).')
 
@@ -350,29 +347,29 @@ class Region3(Region):
         return self._state.ders['phi']
     
     @property
-    def phi_pi(self) -> float:
-        """Derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`"""
-        return self._state.ders['phi_pi']
+    def phi_delta(self) -> float:
+        """Derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`"""
+        return self._state.ders['phi_delta']
 
     @property
     def phi_tau(self) -> float:
-        """Derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`"""
+        """Derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`"""
         return self._state.ders['phi_tau']
 
     @property
-    def phi_pipi(self) -> float:
-        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`"""
-        return self.self._state.ders['phi_pipi']
+    def phi_deltadelta(self) -> float:
+        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` with consant `tau`"""
+        return self.self._state.ders['phi_deltadelta']
 
     @property
     def phi_tautau(self) -> float:
-        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`"""
+        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `delta`"""
         return self.self._state.ders['phi_tautau']
     
     @property
-    def phi_pitau(self) -> float:
-        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` and then `tau`"""
-        return self.self._state.ders['phi_pitau']
+    def phi_deltatau(self) -> float:
+        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `delta` and then `tau`"""
+        return self.self._state.ders['phi_deltatau']
 
     @property
     def T(self) -> float:
@@ -432,6 +429,17 @@ class Region3(Region):
     #############################################################
     ####################### Backwards ###########################
     #############################################################
+    def v_pT(self, p:float, T: float) -> float:
+        """
+        Backwards equations 22, 23 and 23 for calculating Temperature as a function of pressure and enthalpy.
+        Args:
+            p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            Temperature (K).
+        """
+
+
     def T_ph(self, p: float, h: float) -> float:
         """
         Backwards equations 22, 23 and 23 for calculating Temperature as a function of pressure and enthalpy.
@@ -513,3 +521,17 @@ class Region3(Region):
             return p
         else:
             raise ValueError(f'State out of bounds. {p},{T}')
+
+    def T_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation for calculating Temperature as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Temperature (K).
+        References:
+            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
+        """
+        p = self.p_hs(h, s)
+        return self.T_ph(p, h)

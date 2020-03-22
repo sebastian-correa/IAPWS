@@ -141,7 +141,7 @@ class Region1(Region):
                    19: {'I': 5, 'J': 0, 'n': -4.36407041874559e2}}
 
 
-    def __init__(self, p: Optional[float] = None, T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
+    def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then the point (p, T) = (3, 300) is instanciated. This point is chosen from Table 5 as a reference point.
         """
@@ -460,3 +460,17 @@ class Region1(Region):
             return p
         else:
             raise ValueError(f'State out of bounds.')
+    
+    def T_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation for calculating Temperature as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Temperature (K).
+        References:
+            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
+        """
+        p = self.p_hs(h, s)
+        return self.T_ph(p, h)

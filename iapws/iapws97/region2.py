@@ -445,9 +445,9 @@ class Region2(Region):
                    30: {'I': 12, 'J': 7, 'n': -0.296492620980124e11},
                    31: {'I': 16, 'J': 10, 'n': -0.111754907323424e16}}
 
-    def __init__(self, p: Optional[float] = None, T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
+    def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
-        If all parameters are None (their default), then the point (p, T) = (3, 300) is instanciated. This point is chosen from Table 5 as a reference point.
+        If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region3` check can be performed easily.
         """
         params = [p, T, h, s]
         if state is not None and all(param is None for param in params):
@@ -567,7 +567,7 @@ class Region2(Region):
     @staticmethod
     def b2bc(p:Optional[float] = None, h: Optional[float] = None) -> str:
         """
-        Implements the equation for the boundaries in subregions of region 2.
+        Implements the equation for the boundaries in subregions of region 2 (eqns 20 and 21).
         Args:
             p: Pressure (MPa).
             h: Enthalpy (kJ/kg).
@@ -1057,3 +1057,17 @@ class Region2(Region):
             return p
         else:
             raise ValueError(f'State out of bounds. {p},{T}')
+
+    def T_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation for calculating Temperature as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Temperature (K).
+        References:
+            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
+        """
+        p = self.p_hs(h, s)
+        return self.T_ph(p, h)
