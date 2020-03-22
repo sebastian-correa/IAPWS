@@ -141,12 +141,9 @@ class Region3(Region):
             gpt = gptO + gptR
             
             self._state.ders = defaultdict(float,
-                                           gammaO=ggO, gammaR=ggR, gamma=gg,
-                                           gammaO_pi=gpO, gammaR_pi=gpO, gamma_pi=gp,
-                                           gammaO_tau=gtO, gammaR_tau=gtR, gamma_tau=gt,
-                                           gammaO_pipi=gppO, gammaR_pipi=gppR, gamma_pipi=gpp,
-                                           gammaO_tautau=gttO, gammaR_tautau=gttR, gamma_tautau=gtt,
-                                           gammaO_pitau=gptO, gammaR_pitau=gptR, gamma_pitau=gpt)
+                                           phi=gg,
+                                           phi_pi=gp, phi_tau=gt,
+                                           phi_pipi=gpp, phi_tautau=gtt, phi_pitau=gpt)
 
             self._state.v = _pi * gp * R * T / p / 1000  # R*T/p has units of 1000 m^3/kg.
             self._state.u = R * T * (tau*gt - _pi*gp)
@@ -171,7 +168,7 @@ class Region3(Region):
         """
         if not 623.15 <= T <= 863.15:
             raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
-        return  Region2.b23_const[1] + Region2.b23_const[2] * T + Region2.b23_const[3] * T**2
+        return  Region3.b23_const[1] + Region3.b23_const[2] * T + Region3.b23_const[3] * T**2
     
     @staticmethod
     def T_b23(p: float) -> float:
@@ -186,40 +183,7 @@ class Region3(Region):
         """
         if not 16.5292 <= p <= 100:
             raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
-        return  Region2.b23_const[4] + np.sqrt( (p - Region2.b23_const[5]) / Region2.b23_const[3] )
-
-    @staticmethod
-    def b2bc(p:Optional[float] = None, h: Optional[float] = None) -> str:
-        """
-        Implements the equation for the boundaries in subregions of region 2.
-        Args:
-            p: Pressure (MPa).
-            h: Enthalpy (kJ/kg).
-        Returns:
-            The value of p if h is given or the value of h if p is given.
-        Raises:
-            ValueError if both p and h are supplied.
-        """
-        # TODO: Page 21 limits?
-        if h is not None and p is None:
-            _pi = Region2.b23bc_const[1] + Region2.b23bc_const[2] * h + Region2.b23bc_const[3] * h**2
-            return  _pi
-        elif p is not None and h is None:
-            eta = Region2.b23bc_const[4] + np.sqrt( (p - Region2.b23bc_const[5]) / Region2.b23bc_const[3] )
-            return  eta
-        else:
-            raise ValueError('Pass only T or P, not both.')
-    
-    @staticmethod
-    def h_2ab(s: float) -> float:
-        """
-        Used to determine wheter to use region 2a or 2b. Eq.2 from supplementary release.
-        Args:
-            s: Entryopy (kJ/kg/K)
-        Returns:
-            The value of the enthalpy in region 2 for a given entropy.
-        """
-        return Region2.table5_supp[1] + Region2.table5_supp[2] * s + Region2.table5_supp[3] * s**2 + Region2.table5_supp[4] * s**3
+        return  Region3.b23_const[4] + np.sqrt( (p - Region3.b23_const[5]) / Region3.b23_const[3] )
 
     @staticmethod
     def subregion(p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> str:
@@ -271,11 +235,7 @@ class Region3(Region):
         if not isinstance(other, State):
             return False
         else:
-            # Lower bounds for p from page 5 of Revised Supplementary Release on Backward Equations for Pressure as a Function of Enthalpy and Entropy p(h,s) for Regions 1 and 2 of the IAPWS...
-            cond1 = 273.15 <= other.T <= 623.15 and 611.213e-6 <= other.p <= _p_s(T=other.T)
-            cond2 = 623.15 <= other.T <= 863.15 and 611.213e-6 <= other.p <= Region2.p_b23(T=other.T)
-            cond3 = 863.15 <= other.T <= 1073.15 and 611.213e-6 <= other.p <= 100
-            return cond1 or cond2 or cond3
+            return 623.15 <= T <= Region3.T_b23(p) and Region3.p_b23(T) <= p <= 100
 
     def __repr__(self) -> str:
         return f'Region3(p={self.p}, T={self.T})'
@@ -305,220 +265,99 @@ class Region3(Region):
     ################## FIRST ORDER DERIVATIVES ##################
     #############################################################
     @staticmethod
-    def base_id_gas_der_pi_const_tau(T: float, p: float) -> float:
-        """Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
-        Also known as gammaO_pi.
+    def base_der_pi_const_tau(T: float, p: float) -> float:
+        """Derivative of Ideal gas part of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
+        Also known as phi_pi.
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
+            Derivative of Ideal gas part of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
         """
         return 1/p
 
     @staticmethod
-    def base_residual_der_pi_const_tau(T: float, p: float) -> float:
-        """Derivative of residual of dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
-        Also known as gammaR_pi.
+    def base_der_pi_const_tau(T: float, p: float) -> float:
+        """Derivative of residual of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
+        Also known as phi_pi.
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
+            Derivative of residual part of dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
         """
         tau = 540 / T
         return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
-
-    @staticmethod
-    def base_id_gas_der_tau_const_pi(T: float, p: float) -> float:
-        """Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `tau` with consant `pi`
-        Also known as gammaO_tau.
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `tau` with consant `pi`
-        """
-        tau = 540 / T
-        return sum(entry['n'] * entry['J'] * tau**(entry['J'] - 1) for entry in Region2.table10.values())
-    
-    @staticmethod
-    def base_residual_der_tau_const_pi(T: float, p: float) -> float:
-        """Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
-        Also known as gammaR_tau.
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
-        """
-        tau = 540 / T
-        return sum(entry['n'] * p**entry['I'] * entry['J'] * (tau - 0.5)**(entry['J'] - 1) for entry in Region2.table11.values())
 
     #############################################################
     ################# SECOND ORDER DERIVATIVES ##################
     #############################################################
     @staticmethod
-    def base_id_gas_der2_pipi_const_tau(T: float, p: float) -> float:
-        """Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
+    def base_der2_pipi_const_tau(T: float, p: float) -> float:
+        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
+            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`
         """
         return -1/p**2
     
     @staticmethod
-    def base_id_gas_der2_tautau_const_pi(T: float, p: float) -> float:
-        """Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+    def base_der2_tautau_const_pi(T: float, p: float) -> float:
+        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
+            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
         return sum(entry['n'] * entry['J'] * (entry['J'] -1) * tau**(entry['J'] - 2) for entry in Region2.table10.values())
     
     @staticmethod
-    def base_id_gas_der2_pitau(T: float, p: float) -> float:
-        """Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
+    def base_der2_pitau(T: float, p: float) -> float:
+        """Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` and then `tau`
         Args:
             T: Temperature (K)
             p: Pressure (MPa)
         Returns:
-            Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
+            Second order derivative of Ideal gas part of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` and then `tau`
         """
         return 0
-
-    @staticmethod
-    def base_residual_der2_pipi_const_tau(T: float, p: float) -> float:
-        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
-        """
-        tau = 540 / T
-        return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * p **(entry['I'] - 2) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
-    
-    @staticmethod
-    def base_residual_der2_tautau_const_pi(T: float, p: float) -> float:
-        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
-        """
-        tau = 540 / T
-        return sum(entry['n'] * p**entry['I'] * entry['J'] * (entry['J'] - 1) * (tau - 0.5)**(entry['J'] - 2) for entry in Region2.table11.values())
-    
-    @staticmethod
-    def base_residual_der2_pitau(T: float, p: float) -> float:
-        """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` and then `tau`
-        Args:
-            T: Temperature (K)
-            p: Pressure (MPa)
-        Returns:
-            Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` and then `tau`
-        """
-        tau = 540 / T
-        return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * entry['J'] * (tau - 0.5)**(entry['J'] - 1) for entry in Region2.table11.values())
 
     #############################################################
     ####################### Properties ##########################
     #############################################################
     @property
-    def gamma(self) -> float:
-        """Dimensionless specific Gibbs free energy (eq. 15)."""
-        return self._state.ders['gamma']
-
-    @property
-    def gammaO(self) -> float:
-        """Dimensionless specific Gibbs free energy ideal gas(eq. 16)."""
-        return self._state.ders['gammaO']
+    def phi(self) -> float:
+        """Dimensionless specific Helmholtz free energy (eq. 15)."""
+        return self._state.ders['phi']
     
     @property
-    def gammaR(self) -> float:
-        """Dimensionless specific Gibbs free energy residual (eq. 17)."""
-        return self._state.ders['gammaO']
+    def phi_pi(self) -> float:
+        """Derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`"""
+        return self._state.ders['phi_pi']
 
     @property
-    def gamma_pi(self) -> float:
-        """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`"""
-        return self._state.ders['gamma_pi']
+    def phi_tau(self) -> float:
+        """Derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`"""
+        return self._state.ders['phi_tau']
+
+    @property
+    def phi_pipi(self) -> float:
+        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` with consant `tau`"""
+        return self.self._state.ders['phi_pipi']
+
+    @property
+    def phi_tautau(self) -> float:
+        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `tau` with consant `pi`"""
+        return self.self._state.ders['phi_tautau']
     
     @property
-    def gammaO_pi(self) -> float:
-        """Ideal gas part of the derivative of gamma with respect to pi."""
-        return self._state.ders['gammaO_pi']
-
-    @property
-    def gammaR_pi(self) -> float:
-        """Residual part of the derivative of gamma with respect to pi."""
-        return self._state.ders['gammaR_pi']
-
-    @property
-    def gamma_tau(self) -> float:
-        """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`"""
-        return self._state.ders['gamma_tau']
-
-    @property
-    def gammaO_tau(self) -> float:
-        """Ideal gas part of the derivative of gamma with respect to tau."""
-        return self._state.ders['gammaO_tau']
-
-    @property
-    def gammaR_tau(self) -> float:
-        """Residual part of the derivative of gamma with respect to tau."""
-        return self._state.ders['gammaR_tau']
-
-    @property
-    def gamma_pipi(self) -> float:
-        """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`"""
-        return self.self._state.ders['gamma_pipi']
-
-    @property
-    def gammaO_pipi(self) -> float:
-        """Ideal gas part of the second order derivative of gamma with respect to pi twice."""
-        return self.self._state.ders['gammaO_pipi']
-
-    @property
-    def gammaR_pipi(self) -> float:
-        """Residual part of the second order derivative of gamma with respect to pi twice."""
-        return self.self._state.ders['gammaR_pipi']
-
-    @property
-    def gamma_tautau(self) -> float:
-        """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`"""
-        return self.self._state.ders['gamma_tautau']
-    
-    @property
-    def gammaO_tautau(self) -> float:
-        """Idel gas part of the second order derivative of gamma with respect to pi twice."""
-        return self.self._state.ders['gammaO_tautau']
-    @property
-    def gammaR_tautau(self) -> float:
-        """Residual part of the second order derivative of gamma with respect to tau twice."""
-        return self.self._state.ders['gammaR_tautau']
-
-    @property
-    def gamma_pitau(self) -> float:
-        """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`"""
-        return self.self._state.ders['gamma_pitau']
-
-    @property
-    def gammaO_pitau(self) -> float:
-        """Ideal gas part of the second order derivative of gamma with respect to pi and then tau."""
-        return self.self._state.ders['gammaO_pitau']
-
-    @property
-    def gammaR_pitau(self) -> float:
-        """Residual part of the second order derivative of gamma with respect to pi and then tau."""
-        return self.self._state.ders['gammaR_pitau']
+    def phi_pitau(self) -> float:
+        """Second order derivative of Dimensionless specific Helmholtz free energy (`phi`) with respect to `pi` and then `tau`"""
+        return self.self._state.ders['phi_pitau']
 
     @property
     def T(self) -> float:
