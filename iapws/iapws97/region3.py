@@ -2,7 +2,7 @@ import numpy as np
 from typing import Optional, Dict
 from collections import defaultdict
 
-from ._utils import State, Region, R, _p_s, rho_c, T_c
+from ._utils import State, Region, R, _p_s, rho_c, T_c, s_c
 
 class Region3(Region):
     """
@@ -69,11 +69,142 @@ class Region3(Region):
 
     table1_supp = {1: 0.201_464_004_206_875e4, 2: 0.374_696_550_136_983e1, 3: -0.219_921_901_054_187e-1, 4: 0.875_131_686_009_950e-4}
 
+    table3_supp = {1: {'I': -12, 'J': 0, 'n': -0.133645667811215e-6},
+                   2: {'I': -12, 'J': 1, 'n': 0.455912656802978e-5},
+                   3: {'I': -12, 'J': 2, 'n': -0.146294640700979e-4},
+                   4: {'I': -12, 'J': 6, 'n': 0.639341312970080e-2},
+                   5: {'I': -12, 'J': 14, 'n': 0.372783927268847e3},
+                   6: {'I': -12, 'J': 16, 'n': -0.718654377460447e4},
+                   7: {'I': -12, 'J': 20, 'n': 0.573494752103400e6},
+                   8: {'I': -12, 'J': 22, 'n': -0.267569329111439e7},
+                   9: {'I': -10, 'J': 1, 'n': -0.334066283302614e-4},
+                   10: {'I': -10, 'J': 5, 'n': -0.245479214069597e-1},
+                   11: {'I': -10, 'J': 12, 'n': 0.478087847764996e2},
+                   12: {'I': -8, 'J': 0, 'n': 0.764664131818904e-5},
+                   13: {'I': -8, 'J': 2, 'n': 0.128350627676972e-2},
+                   14: {'I': -8, 'J': 4, 'n': 0.171219081377331e-1},
+                   15: {'I': -8, 'J': 10, 'n': -0.851007304583213e1},
+                   16: {'I': -5, 'J': 2, 'n': -0.136513461629781e-1},
+                   17: {'I': -3, 'J': 0, 'n': -0.384460997596657e-5},
+                   18: {'I': -2, 'J': 1, 'n': 0.337423807911655e-2},
+                   19: {'I': -2, 'J': 3, 'n': -0.551624873066791},
+                   20: {'I': -2, 'J': 4, 'n': 0.729202277107470},
+                   21: {'I': -1, 'J': 0, 'n': -0.992522757376041e-2},
+                   22: {'I': -1, 'J': 2, 'n': -0.119308831407288},
+                   23: {'I': 0, 'J': 0, 'n': 0.793929190615421},
+                   24: {'I': 0, 'J': 1, 'n': 0.454270731799386},
+                   25: {'I': 1, 'J': 1, 'n': 0.209998591259910},
+                   26: {'I': 3, 'J': 0, 'n': -0.642109823904738e-2},
+                   27: {'I': 3, 'J': 1, 'n': -0.235155868604540e-1},
+                   28: {'I': 4, 'J': 0, 'n': 0.252233108341612e-2},
+                   29: {'I': 4, 'J': 3, 'n': -0.764885133368119e-2},
+                   30: {'I': 10, 'J': 4, 'n': 0.136176427574291e-1},
+                   31: {'I': 12, 'J': 5, 'n': -0.133027883575669e-1}}
+ 
+    table4_supp = {1: {'I': -12, 'J': 0, 'n': 0.323254573644920e-4},
+                   2: {'I': -12, 'J': 1, 'n': -0.127575556587181e-3},
+                   3: {'I': -10, 'J': 0, 'n': -0.475851877356068e-3},
+                   4: {'I': -10, 'J': 1, 'n': 0.156183014181602e-2},
+                   5: {'I': -10, 'J': 5, 'n': 0.105724860113781},
+                   6: {'I': -10, 'J': 10, 'n': -0.858514221132534e2},
+                   7: {'I': -10, 'J': 12, 'n': 0.724140095480911e3},
+                   8: {'I': -8, 'J': 0, 'n': 0.296475810273257e-2},
+                   9: {'I': -8, 'J': 1, 'n': -0.592721983365988e-2},
+                   10: {'I': -8, 'J': 2, 'n': -0.126305422818666e-1},
+                   11: {'I': -8, 'J': 4, 'n': -0.115716196364853},
+                   12: {'I': -8, 'J': 10, 'n': 0.849000969739595e2},
+                   13: {'I': -6, 'J': 0, 'n': -0.108602260086615e-1},
+                   14: {'I': -6, 'J': 1, 'n': 0.154304475328851e-1},
+                   15: {'I': -6, 'J': 2, 'n': 0.750455441524466e-1},
+                   16: {'I': -4, 'J': 0, 'n': 0.252520973612982e-1},
+                   17: {'I': -4, 'J': 1, 'n': -0.602507901232996e-1},
+                   18: {'I': -3, 'J': 5, 'n': -0.307622221350501e1},
+                   19: {'I': -2, 'J': 0, 'n': -0.574011959864879e-1},
+                   20: {'I': -2, 'J': 4, 'n': 0.503471360939849e1},
+                   21: {'I': -1, 'J': 2, 'n': -0.925081888584834},
+                   22: {'I': -1, 'J': 4, 'n': 0.391733882917546e1},
+                   23: {'I': -1, 'J': 6, 'n': -0.773146007130190e2},
+                   24: {'I': -1, 'J': 10, 'n': 0.949308762098587e4},
+                   25: {'I': -1, 'J': 14, 'n': -0.141043719679409e7},
+                   26: {'I': -1, 'J': 16, 'n': 0.849166230819026e7},
+                   27: {'I': 0, 'J': 0, 'n': 0.861095729446704},
+                   28: {'I': 0, 'J': 2, 'n': 0.323346442811720},
+                   29: {'I': 1, 'J': 1, 'n': 0.873281936020439},
+                   30: {'I': 3, 'J': 1, 'n': -0.436653048526683},
+                   31: {'I': 5, 'J': 1, 'n': 0.286596714529479},
+                   32: {'I': 6, 'J': 1, 'n': -0.131778331276228},
+                   33: {'I': 8, 'J': 1, 'n': 0.676682064330275e-2}}
+
+    table6_supp = {1: {'I': -12, 'J': 6, 'n': 0.529944062966028e-2},
+                   2: {'I': -12, 'J': 8, 'n': -0.170099690234461},
+                   3: {'I': -12, 'J': 12, 'n': 0.111323814312927e2},
+                   4: {'I': -12, 'J': 18, 'n': -0.217898123145125e4},
+                   5: {'I': -10, 'J': 4, 'n': -0.506061827980875e-3},
+                   6: {'I': -10, 'J': 7, 'n': 0.556495239685324},
+                   7: {'I': -10, 'J': 10, 'n': -0.943672726094016e1},
+                   8: {'I': -8, 'J': 5, 'n': -0.297856807561527},
+                   9: {'I': -8, 'J': 12, 'n': 0.939353943717186e2},
+                   10: {'I': -6, 'J': 3, 'n': 0.192944939465981e-1},
+                   11: {'I': -6, 'J': 4, 'n': 0.421740664704763},
+                   12: {'I': -6, 'J': 22, 'n': -0.368914126282330e7},
+                   13: {'I': -4, 'J': 2, 'n': -0.737566847600639e-2},
+                   14: {'I': -4, 'J': 3, 'n': -0.354753242424366},
+                   15: {'I': -3, 'J': 7, 'n': -0.199768169338727e1},
+                   16: {'I': -2, 'J': 3, 'n': 0.115456297059049e1},
+                   17: {'I': -2, 'J': 16, 'n': 0.568366875815960e4},
+                   18: {'I': -1, 'J': 0, 'n': 0.808169540124668e-2},
+                   19: {'I': -1, 'J': 1, 'n': 0.172416341519307},
+                   20: {'I': -1, 'J': 2, 'n': 0.104270175292927e1},
+                   21: {'I': -1, 'J': 3, 'n': -0.297691372792847},
+                   22: {'I': 0, 'J': 0, 'n': 0.560394465163593},
+                   23: {'I': 0, 'J': 1, 'n': 0.275234661176914},
+                   24: {'I': 1, 'J': 0, 'n': -0.148347894866012},
+                   25: {'I': 1, 'J': 1, 'n': -0.651142513478515e-1},
+                   26: {'I': 1, 'J': 2, 'n': -0.292468715386302e1},
+                   27: {'I': 2, 'J': 0, 'n': 0.664876096952665e-1},
+                   28: {'I': 2, 'J': 2, 'n': 0.352335014263844e1},
+                   29: {'I': 3, 'J': 0, 'n': -0.146340792313332e-1},
+                   30: {'I': 4, 'J': 2, 'n': -0.224503486668184e1},
+                   31: {'I': 5, 'J': 2, 'n': 0.110533464706142e1},
+                   32: {'I': 8, 'J': 2, 'n': -0.408757344495612e-1}}
+
+    table7_supp = {1: {'I': -12, 'J': 0, 'n': -0.225196934336318e-8},
+                   2: {'I': -12, 'J': 1, 'n': 0.140674363313486e-7},
+                   3: {'I': -8, 'J': 0, 'n': 0.233784085280560e-5},
+                   4: {'I': -8, 'J': 1, 'n': -0.331833715229001e-4},
+                   5: {'I': -8, 'J': 3, 'n': 0.107956778514318e-2},
+                   6: {'I': -8, 'J': 6, 'n': -0.271382067378863},
+                   7: {'I': -8, 'J': 7, 'n': 0.107202262490333e1},
+                   8: {'I': -8, 'J': 8, 'n': -0.853821329075382},
+                   9: {'I': -6, 'J': 0, 'n': -0.215214194340526e-4},
+                   10: {'I': -6, 'J': 1, 'n': 0.769656088222730e-3},
+                   11: {'I': -6, 'J': 2, 'n': -0.431136580433864e-2},
+                   12: {'I': -6, 'J': 5, 'n': 0.453342167309331},
+                   13: {'I': -6, 'J': 6, 'n': -0.507749535873652},
+                   14: {'I': -6, 'J': 10, 'n': -0.100475154528389e3},
+                   15: {'I': -4, 'J': 3, 'n': -0.219201924648793},
+                   16: {'I': -4, 'J': 6, 'n': -0.321087965668917e1},
+                   17: {'I': -4, 'J': 10, 'n': 0.607567815637771e3},
+                   18: {'I': -3, 'J': 0, 'n': 0.557686450685932e-3},
+                   19: {'I': -3, 'J': 2, 'n': 0.187499040029550},
+                   20: {'I': -2, 'J': 1, 'n': 0.905368030448107e-2},
+                   21: {'I': -2, 'J': 2, 'n': 0.285417173048685},
+                   22: {'I': -1, 'J': 0, 'n': 0.329924030996098e-1},
+                   23: {'I': -1, 'J': 1, 'n': 0.239897419685483},
+                   24: {'I': -1, 'J': 4, 'n': 0.482754995951394e1},
+                   25: {'I': -1, 'J': 5, 'n': -0.118035753702231e2},
+                   26: {'I': 0, 'J': 0, 'n': 0.169490044091791},
+                   27: {'I': 1, 'J': 0, 'n': -0.179967222507787e-1},
+                   28: {'I': 1, 'J': 1, 'n': 0.371810116332674e-1},
+                   29: {'I': 2, 'J': 2, 'n': -0.536288335065096e-1},
+                   30: {'I': 2, 'J': 6, 'n': 0.160697101092520e1}}
+
 
     def __init__(self, T: Optional[float] = None, rho: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region3` check can be performed easily.
         """
+        p = rho
         params = [p, T, h, s]
         if state is not None and all(param is None for param in params):
             # Case: Only state is given. To handle: convert to normal case.
@@ -183,7 +314,7 @@ class Region3(Region):
             ValueError if p is not in [16.5292, 100]
         """
         if not 16.5292 <= p <= 100:
-            raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
+            raise ValueError(f'p must be in the range [16.5292, 100]. {p} MPa supplied.')
         return  Region3.b23_const[4] + np.sqrt( (p - Region3.b23_const[5]) / Region3.b23_const[3] )
 
     @staticmethod
@@ -212,7 +343,7 @@ class Region3(Region):
         """
         #TODO: Probably check if value is in fact in region3?
         if (s is not None and h is not None and p is None) or (s is not None and p is not None and h is None):
-            if s >= 4.41202148223476:
+            if s >= s_c:
                 return 'b'
             else:
                 return 'a'
@@ -232,7 +363,7 @@ class Region3(Region):
         if not isinstance(other, State):
             return False
         else:
-            return 623.15 <= T <= Region3.T_b23(p) and Region3.p_b23(T) <= p <= 100
+            return 623.15 <= other.T <= Region3.T_b23(other.p) and Region3.p_b23(other.T) <= other.p <= 100
 
     def __repr__(self) -> str:
         return f'Region3(p={self.p}, T={self.T})'
@@ -439,24 +570,61 @@ class Region3(Region):
             Temperature (K).
         """
 
+    def v_ph(self, p: float, h: float) -> float:
+        """
+        Backwards equations 2 and 3 for calculating Specific Volume as a function of pressure and enthalpy (supplementary release 2014).
+        Args:
+            p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            Specific Volume (m^3/kg).
+        """
+        reg = self.subregion(p=p, h=h)
+        if reg == 'a':
+            _pi = p / 100
+            eta = h / 2100
+            v = 0.0028 * sum(entry['n'] * (_pi + 0.128)**entry['I'] * (eta - 0.727)**entry['J'] for entry in Region3.table6_supp.values())
+        elif reg == 'b':
+            _pi = p / 100
+            eta = h / 2800
+            v = 0.0088 * sum(entry['n'] * (_pi + 0.0661)**entry['I'] * (eta - 0.72)**entry['J'] for entry in Region3.table7_supp.values())
+
+        return v
+        # TODO: Check if state is in region:
+        #if State(p=p, T=T) in self:
+        #    return T
+        #else:
+        #    raise ValueError(f'State out of bounds. {T}')
+
+    def rho_ph(self, p: float, h: float) -> float:
+        """
+        Backwards equations 2 and 3 for calculating density as a function of pressure and enthalpy (supplementary release 2014).
+        Args:
+            p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            Density (kg/m^3).
+        """
+        return 1 / self.v_ph(p, h)
 
     def T_ph(self, p: float, h: float) -> float:
         """
-        Backwards equations 22, 23 and 23 for calculating Temperature as a function of pressure and enthalpy.
+        Backwards equations 2 and 3 for calculating Temperature as a function of pressure and enthalpy (supplementary release 2014).
         Args:
             p: Pressure (MPa).
             h: Enthalpy (kJ/kg).
         Returns:
             Temperature (K).
         """
-        eta = h / 2000
         reg = self.subregion(p=p, h=h)
         if reg == 'a':
-            T = sum(entry['n'] * p**entry['I'] * (eta - 2.1)**entry['J'] for entry in Region2.table20.values())
+            _pi = p / 100
+            eta = h / 2300
+            T = 760 * sum(entry['n'] * (_pi + 0.24)**entry['I'] * (eta - 0.615)**entry['J'] for entry in Region3.table3_supp.values())
         elif reg == 'b':
-            T = sum(entry['n'] * (p - 2)**entry['I'] * (eta - 2.6)**entry['J'] for entry in Region2.table21.values())
-        elif reg == 'c':
-            T = sum(entry['n'] * (p + 25)**entry['I'] * (eta - 1.8)**entry['J'] for entry in Region2.table22.values())
+            _pi = p / 100
+            eta = h / 2800
+            T = 860 * sum(entry['n'] * (_pi + 0.298)**entry['I'] * (eta - 0.72)**entry['J'] for entry in Region3.table4_supp.values())
 
         if State(p=p, T=T) in self:
             return T
