@@ -1,6 +1,7 @@
 import numpy as np
-from typing import Optional, Dict
+from typing import Optional
 from collections import defaultdict
+from scipy.optimize import  fsolve
 
 from ._utils import State, Region, R, _p_s
 
@@ -98,7 +99,7 @@ class Region1(Region):
             18: {'I': 4, 'J': 32, 'n': -0.934_777_712_139_47e-12},
             19: {'I': 5, 'J': 32, 'n': 0.582_654_420_206_01e-14},
             20: {'I': 6, 'J': 32, 'n': -0.150_201_859_535_03e-16}}
-    
+
     table8 = {1: {'I': 0, 'J': 0, 'n': 0.174_782_680_583_07e3},
               2: {'I': 0, 'J': 1, 'n': 0.348_069_308_928_73e2},
               3: {'I': 0, 'J': 2, 'n': 0.652_925_849_784_55e1},
@@ -119,7 +120,7 @@ class Region1(Region):
               18: {'I': 3, 'J': 10, 'n': 0.264_004_413_606_89e-12},
               19: {'I': 3, 'J': 32, 'n': 0.781_246_004_597_23e-28},
               20: {'I': 4, 'J': 32, 'n': -0.307_321_999_036_68e-30}}
-    
+
     table2_supp = {1: {'I': 0, 'J': 0, 'n': -0.691997014660582},
                    2: {'I': 0, 'J': 1, 'n': -1.83612548787560e1},
                    3: {'I': 0, 'J': 2, 'n': -9.28332409297335e0},
@@ -139,7 +140,6 @@ class Region1(Region):
                    17: {'I': 4, 'J': 1, 'n': 7.30000345529245e2},
                    18: {'I': 4, 'J': 4, 'n': 1.14284032569021e3},
                    19: {'I': 5, 'J': 0, 'n': -4.36407041874559e2}}
-
 
     def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
@@ -175,9 +175,13 @@ class Region1(Region):
             self._state.p = p
             self._state.s = s
         elif T and h:
-            pass
+            self._state.T = T
+            self._state.p = self.p_Th(T=T, h=h)
+            self._state.h = h
         elif T and s:
-            pass
+            self._state.T = T
+            self._state.p = self.p_Ts(T=T, s=s)
+            self._state.s = s
         elif h and s:
             self._state.p = self.p_hs(h, s)
             self._state.T = self.T_ph(p, h)
@@ -185,8 +189,8 @@ class Region1(Region):
             self._state.h = h
         else:
             raise ValueError('You should only pass one of the following combinations to determine a state in Reg1: (p,T) (p, h), (p, s), (T, h), (T,s), (h, s).')
-        
-        
+
+
         if calc:
             tau = 1386 / T
             _pi = p / 16.53
@@ -201,7 +205,7 @@ class Region1(Region):
             gpp = Region1.base_der2_pipi_const_tau(T=T, p=p)
             gtt = Region1.base_der2_tautau_const_pi(T=T, p=p)
             gpt = Region1.base_der2_pitau(T=T, p=p)
-            
+
             self._state.ders = defaultdict(float, gamma=gg, gamma_pi=gp, gamma_tau=gt, gamma_pipi=gpp, gamma_tautau=gtt, gamma_pitau=gpt)
 
             self._state.v = _pi * gp * R * T / p / 1000  # R*T/p has units of 1000 m^3/kg.
@@ -223,7 +227,7 @@ class Region1(Region):
             return False
         else:
             return 273.15 <= other.T <= 623.15 and _p_s(T=other.T) <= other.p <= 100
-    
+
     def __repr__(self) -> str:
         return f'Region1(p={self.p}, T={self.T})'
 
@@ -245,7 +249,7 @@ class Region1(Region):
     def specific_gibbs_free_energy(T: float, p: float) -> float:
         """Alias for `self.base_eqn`"""
         return Region1.base_eqn(T, p) * R * T
-    
+
     #############################################################
     ################## FIRST ORDER DERIVATIVES ##################
     #############################################################
@@ -262,7 +266,7 @@ class Region1(Region):
         tau = 1386 / T
         _pi = p / 16.53
         return sum(- entry['n'] * entry['I'] * (7.1 - _pi)**(entry['I'] - 1) * (tau - 1.222)**entry['J'] for entry in Region1.table2.values())
-    
+
     @staticmethod
     def base_der_tau_const_pi(T: float, p: float) -> float:
         """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`.
@@ -276,7 +280,7 @@ class Region1(Region):
         tau = 1386 / T
         _pi = p / 16.53
         return sum(entry['n'] * (7.1 - _pi)**entry['I'] * entry['J'] * (tau - 1.222)**(entry['J'] - 1) for entry in Region1.table2.values())
-    
+
     #############################################################
     ################# SECOND ORDER DERIVATIVES ##################
     #############################################################
@@ -292,7 +296,7 @@ class Region1(Region):
         tau = 1386 / T
         _pi = p / 16.53
         return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * (7.1 - _pi)**(entry['I'] - 2) * (tau - 1.222)**entry['J'] for entry in Region1.table2.values())
-    
+
     @staticmethod
     def base_der2_tautau_const_pi(T: float, p: float) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
@@ -305,7 +309,7 @@ class Region1(Region):
         tau = 1386 / T
         _pi = p / 16.53
         return sum(entry['n'] * (7.1 - _pi)**entry['I'] * entry['J'] * (entry['J'] -1) * (tau - 1.222)**(entry['J'] - 2) for entry in Region1.table2.values())
-    
+
     @staticmethod
     def base_der2_pitau(T: float, p: float) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
@@ -371,12 +375,12 @@ class Region1(Region):
     def v(self) -> float:
         """Specific volume in m^3/kg"""
         return self._state.v
-    
+
     @property
     def rho(self) -> float:
         """Density in kg/m^3"""
         return self._state.rho
-    
+
     @property
     def u(self) -> float:
         """Specific internal energy in kJ/kg"""
@@ -386,7 +390,7 @@ class Region1(Region):
     def s(self) -> float:
         """Specific entropy in kJ/kg/K"""
         return self._state.s
-    
+
     @property
     def h(self) -> float:
         """Specific enthalpy in kJ/kg"""
@@ -401,7 +405,7 @@ class Region1(Region):
     def cv(self) -> float:
         """Specific isochoric heat capacity kJ/kg/K"""
         return self._state.cv
-    
+
     @property
     def w(self) -> float:
         """Speed of sound in m/s"""
@@ -442,27 +446,6 @@ class Region1(Region):
             #TODO: Suggest a region.
             raise ValueError(f'State out of bounds. {T}')
 
-    def p_hs(self, h: float, s: float) -> float:
-        """
-        Backwards equation 1 from [1] for calculating pressure as a function of enthalpy and entropy.
-        Args:
-            h: Enthalpy (kJ/kg).
-            s: Entropy (kJ/kg/K).
-        Returns:
-            Pressure (MPa).
-        References:
-            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
-        """
-        eta = h / 3400
-        sigma = s / 7.6
-        
-        p = 100 * sum(entry['n'] * (eta + 0.05)**entry['I'] * (sigma + 0.05)**entry['J'] for entry in Region1.table2_supp.values())
-        T = self.T_ps(p, s)
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds.')
-    
     def T_hs(self, h: float, s: float) -> float:
         """
         Backwards equation for calculating Temperature as a function of enthalpy and entropy.
@@ -476,3 +459,75 @@ class Region1(Region):
         """
         p = self.p_hs(h, s)
         return self.T_ph(p, h)
+
+    def p_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation 1 from [1] for calculating pressure as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Pressure (MPa).
+        References:
+            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
+        """
+        eta = h / 3400
+        sigma = s / 7.6
+
+        p = 100 * sum(entry['n'] * (eta + 0.05)**entry['I'] * (sigma + 0.05)**entry['J'] for entry in Region1.table2_supp.values())
+        T = self.T_ps(p, s)
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds.')
+
+    def p_Th(self, T: float, h: float) -> float:
+        """
+        Backwards equation for calculating pressure as a function of Temperature and enthalpy.
+        Beware that this calculation might be time consuming as it is performing iteration (no backwards equation is provided by IAPWS).
+        Args:
+            T: Temperature (K).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            Pressure (MPa).
+        """
+        eta = h / 2500
+
+        def f(p):
+            return self.T_ph(p, h) - T
+
+        def fp(p):
+            return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (eta + 1)**entry['J'] for entry in Region1.table6.values())
+
+        p0 = (_p_s(T=T) + 100) / 2
+        p = fsolve(f, p0, fprime=fp)  # initial p guess from region boundaries (see __contains__).
+
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds.')
+
+    def p_Ts(self, T: float, s: float) -> float:
+        """
+        Backwards equation for calculating pressure as a function of Temperature and Entropy.
+        Beware that this calculation might be time consuming as it is performing iteration (no backwards equation is provided by IAPWS).
+        Args:
+            T: Temperature (K).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Pressure (MPa).
+        """
+
+        def f(p):
+            return self.T_ps(p, s) - T
+
+        def fp(p):
+            return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (s + 2)**entry['J'] for entry in Region1.table8.values())
+
+        p0 = (_p_s(T=T) + 100) / 2
+        p = fsolve(f, p0, fprime=fp)  # initial p guess from region boundaries (see __contains__).
+
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds.')

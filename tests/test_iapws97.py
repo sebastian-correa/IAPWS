@@ -287,6 +287,7 @@ class TestRegion3(unittest.TestCase):
                 self.assertEqual(reg, subregion_calc)
 
     def test_range_validity(self):
+        assert 1 == 2
         # Table 33.
         s = State(T=650, rho=500)
         s1 = State(T=650, rho=200)
@@ -361,6 +362,7 @@ class TestRegion3(unittest.TestCase):
                 self.assertAlmostEqual(v, v_calc, places=4)
     
     def test_backwards_p_hs(self):
+        assert 1 == 2
         # From table 9 of supplement for p(h,s).
         regions = {'a': {'h': [2800, 2800, 4100], 's': [6.5, 9.5, 9.5], 'p': [1.371012767, 1.879743844e-3, 1.024788997e-1]},
                    'b': {'h': [2800, 3600, 3600], 's': [6, 6, 7], 'p': [4.793911442, 8.395519209e1, 7.527161441]},
@@ -378,6 +380,7 @@ class TestRegion3(unittest.TestCase):
                 self.assertAlmostEqual(p, p_calc, places=4)
 
     def test_property_accuracy(self):
+        assert 1 == 2
         """Test the results from Table 15."""
         s = State(T=300, p=0.0035)
         s1 = State(T=700, p=0.0035)
