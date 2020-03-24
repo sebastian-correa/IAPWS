@@ -463,9 +463,10 @@ class Region2(Region):
         calc = True
         self._state = State()
 
+        # Cases are handled such that after this if/elif/else block, p and T are always determined.
         if all(param is None for param in params) and state is None:
             calc = False
-            # Let the class instantiate so that someone can perform a `State in Region1()` check.
+            # Let the class instantiate so that someone can perform a `State in Region2()` check.
         elif p and T:
             self._state.T = T
             self._state.p = p
@@ -487,7 +488,7 @@ class Region2(Region):
             self._state.s = s
             self._state.h = h
         else:
-            raise ValueError('You should only pass one of the following combinations to determine a state in Reg1: (p,T) (p, h), (p, s), (T, h), (T,s), (h, s).')
+            raise ValueError('You should only pass one of the following combinations to determine a state in Reg2: (p,T) (p, h), (p, s), (T, h), (T,s), (h, s).')
         
         
         if calc:
@@ -525,6 +526,7 @@ class Region2(Region):
                                            gammaO_pitau=gptO, gammaR_pitau=gptR, gamma_pitau=gpt)
 
             self._state.v = _pi * gp * R * T / p / 1000  # R*T/p has units of 1000 m^3/kg.
+            self._state.rho = 1 / self._state.v
             self._state.u = R * T * (tau*gt - _pi*gp)
             self._state.s = self._state.s if self._state.s is not None else R * (tau*gt - gg)
             self._state.h = self._state.h if self._state.h is not None else R * T * tau * gt
@@ -941,7 +943,7 @@ class Region2(Region):
     @property
     def rho(self) -> float:
         """Density in kg/m^3"""
-        return 1 / self._state.v
+        return self._state.rho
     
     @property
     def u(self) -> float:

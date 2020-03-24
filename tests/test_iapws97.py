@@ -329,10 +329,10 @@ class TestRegion3(unittest.TestCase):
                 self.assertAlmostEqual(v, v_calc, places=4)
 
     def test_backwards_t_ps(self):
-        # From table 29.
-        regions = {'a': {'s': [7.5, 8, 8], 'p': [0.1, 0.1, 2.5], 'T': [0.399517097e3, 0.514127081e3, 0.103984917e4]},
-            'b': {'p': [8, 8, 90], 's': [6, 7.5, 6], 'T': [0.600484040e3, 0.106495556e4, 0.103801126e4]},
-            'c': {'p': [20, 80, 80], 's': [5.75, 5.25, 5.75], 'T': [0.697992849e3, 0.854011484e3, 0.949017998e3]}}
+        # From table 12 supplementary.
+        regions = {'a': {'s': [3.8, 3.6, 4], 'p': [20, 50, 100], 'T': [6.282959869e2, 6.297158726e2, 7.056880237e2]},
+                   'b': {'p': [20, 50, 100], 's': [5, 4.5, 5], 'T': [6.401176443e2, 7.163687517e2, 8.474332825e2]}}
+
         for reg, vals in regions.items():
             ss = vals['s']
             ps = vals['p']
@@ -341,8 +341,24 @@ class TestRegion3(unittest.TestCase):
             for p, s, T in zip(ps, ss, ts):
                 # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
                 # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
-                T_calc = Region2().T_ps(p=p, s=s)
+                T_calc = Region3().T_ps(p=p, s=s)
                 self.assertAlmostEqual(T, T_calc, places=4)
+
+    def test_backwards_v_ps(self):
+        # From table 15 supplementary.
+        regions = {'a': {'s': [3.8, 3.6, 4], 'p': [20, 50, 100], 'v': [1.733791463e-3, 1.469680170e-3, 1.555893131e-3]},
+                   'b': {'p': [20, 50, 100], 's': [5, 4.5, 5], 'v': [6.262101987e-3, 2.332634294e-3, 2.449610757e-3]}}
+
+        for reg, vals in regions.items():
+            ss = vals['s']
+            ps = vals['p']
+            vs = vals['v']
+
+            for p, s, v in zip(ps, ss, vs):
+                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
+                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
+                v_calc = Region3().v_ps(p=p, s=s)
+                self.assertAlmostEqual(v, v_calc, places=4)
     
     def test_backwards_p_hs(self):
         # From table 9 of supplement for p(h,s).

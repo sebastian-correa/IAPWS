@@ -4,10 +4,10 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
 
-R = 0.461526        # kJ/(kg*K)
-T_c = 647.096       # K
-p_c = 22.064        # MPa
-rho_c = 322         # kg/m^3
+R = 0.461526  # kJ/(kg*K)
+T_c = 647.096  # K
+p_c = 22.064  # MPa
+rho_c = 322  # kg/m^3
 s_c = 4.41202148223476  # kJ/kg/K
 
 b23_const = {1: 0.348_051_856_289_69e3,
@@ -27,6 +27,7 @@ table34 = {1: 0.116_705_214_527_67e4,
            9: -0.238_555_575_678_49,
            10: 0.650_175_348_447_98e3}
 
+
 def b23(p: Optional[float] = None, T: Optional[float] = None) -> float:
     """
     Implements the equation for the boundary between 2 and 3.
@@ -39,13 +40,14 @@ def b23(p: Optional[float] = None, T: Optional[float] = None) -> float:
         ValueError if both p and T are supplied.
     """
     if T is not None and p is None:
-        _pi = b23_const[1] + b23_const[2] * T + b23_const[3] * T**2
-        return  _pi
+        _pi = b23_const[1] + b23_const[2] * T + b23_const[3] * T ** 2
+        return _pi
     elif p is not None and T is None:
-        theta = b23_const[4] + np.sqrt( (p - b23_const[5]) / b23_const[3] )
-        return  theta
+        theta = b23_const[4] + np.sqrt((p - b23_const[5]) / b23_const[3])
+        return theta
     else:
         raise ValueError('Pass only T or P, not both.')
+
 
 def _p_s(T: float) -> float:
     """
@@ -59,12 +61,13 @@ def _p_s(T: float) -> float:
     """
     if not 273.15 <= T <= 647.096:
         raise ValueError(f'T must be in the range [273.15, 647.096]. {T} given.')
-    z = T + table34[9]/(T-table34[10])
-    A = z**2 + table34[1] * z + table34[2]
-    B = table34[3] * z**2 + table34[4] * z + table34[5]
-    C = table34[6] * z**2 + table34[7] * z + table34[8]
-    p = 2*C / (-B + np.sqrt(B**2 - 4*A*C))
-    return p**4
+    z = T + table34[9] / (T - table34[10])
+    A = z ** 2 + table34[1] * z + table34[2]
+    B = table34[3] * z ** 2 + table34[4] * z + table34[5]
+    C = table34[6] * z ** 2 + table34[7] * z + table34[8]
+    p = 2 * C / (-B + np.sqrt(B ** 2 - 4 * A * C))
+    return p ** 4
+
 
 def region(p: float, T: float) -> int:
     """
@@ -79,11 +82,14 @@ def region(p: float, T: float) -> int:
     """
     pass
 
+
 @dataclass
 class State(object):
+    # TODO: Add rho.
     T: float = None
     p: float = None
     v: float = None
+    rho: float = None
     u: float = None
     s: float = None
     h: float = None
@@ -91,6 +97,7 @@ class State(object):
     cv: float = None
     w: float = None
     ders: Dict[str, float] = None
+
 
 class Region(ABC):
     """
@@ -112,19 +119,20 @@ class Region(ABC):
 
     A Region can also have many constants at a class level if those constants are used only inside said region. Otherwise, a module level constant is favoured.
     """
+
     @abstractmethod
     def __contains__(self, other: State) -> bool:
         """
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
         """
-    
+
     @staticmethod
     @abstractmethod
     def base_eqn(T: float, p: float) -> float:
         """
         Implements the base equation.
         """
-    
+
     @abstractmethod
     def __repr__(self) -> str:
         return ''
