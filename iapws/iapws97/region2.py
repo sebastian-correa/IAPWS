@@ -2,7 +2,10 @@ import numpy as np
 from typing import Optional, Dict
 from collections import defaultdict
 
+from scipy.optimize import fsolve
+
 from ._utils import State, Region, R, _p_s
+
 
 class Region2(Region):
     """
@@ -33,7 +36,7 @@ class Region2(Region):
         w
     """
     # ROADMAP:
-        #TODO: Metastable region.
+    # TODO: Metastable region.
 
     table10 = {1: {'J': 0, 'n': -0.96927686500217e1},
                2: {'J': 1, 'n': 0.10086655968018e2},
@@ -46,58 +49,58 @@ class Region2(Region):
                9: {'J': 3, 'n': 0.21268463753307e-1}}
 
     table11 = {1: {'I': 1, 'J': 0, 'n': -0.17731742473213e-2},
-                2: {'I': 1, 'J': 1, 'n': -0.17834862292358e-1},
-                3: {'I': 1, 'J': 2, 'n': -0.45996013696365e-1},
-                4: {'I': 1, 'J': 3, 'n': -0.57581259083432e-1},
-                5: {'I': 1, 'J': 6, 'n': -0.50325278727930e-1},
-                6: {'I': 2, 'J': 1, 'n': -0.33032641670203e-4},
-                7: {'I': 2, 'J': 2, 'n': -0.18948987516315e-3},
-                8: {'I': 2, 'J': 4, 'n': -0.39392777243355e-2},
-                9: {'I': 2, 'J': 7, 'n': -0.43797295650573e-1},
-                10: {'I': 2, 'J': 36, 'n': -0.26674547914087e-4},
-                11: {'I': 3, 'J': 0, 'n': 0.20481737692309e-7},
-                12: {'I': 3, 'J': 1, 'n': 0.43870667284435e-6},
-                13: {'I': 3, 'J': 3, 'n': -0.32277677238570e-4},
-                14: {'I': 3, 'J': 6, 'n': -0.15033924542148e-2},
-                15: {'I': 3, 'J': 35, 'n': -0.40668253562649e-1},
-                16: {'I': 4, 'J': 1, 'n': -0.78847309559367e-9},
-                17: {'I': 4, 'J': 2, 'n': 0.12790717852285e-7},
-                18: {'I': 4, 'J': 3, 'n': 0.48225372718507e-6},
-                19: {'I': 5, 'J': 7, 'n': 0.22922076337661e-5},
-                20: {'I': 6, 'J': 3, 'n': -0.16714766451061e-10},
-                21: {'I': 6, 'J': 16, 'n': -0.21171472321355e-2},
-                22: {'I': 6, 'J': 35, 'n': -0.23895741934104e2},
-                23: {'I': 7, 'J': 0, 'n': -0.59059564324270e-17},
-                24: {'I': 7, 'J': 11, 'n': -0.12621808899101e-5},
-                25: {'I': 7, 'J': 25, 'n': -0.38946842435739e-1},
-                26: {'I': 8, 'J': 8, 'n': 0.11256211360459e-10},
-                27: {'I': 8, 'J': 36, 'n': -0.82311340897998e1},
-                28: {'I': 9, 'J': 13, 'n': 0.19809712802088e-7},
-                29: {'I': 10, 'J': 4, 'n': 0.10406965210174e-18},
-                30: {'I': 10, 'J': 10, 'n': -0.10234747095929e-12},
-                31: {'I': 10, 'J': 14, 'n': -0.10018179379511e-8},
-                32: {'I': 16, 'J': 29, 'n': -0.80882908646985e-10},
-                33: {'I': 16, 'J': 50, 'n': 0.10693031879409},
-                34: {'I': 18, 'J': 57, 'n': -0.33662250574171},
-                35: {'I': 20, 'J': 20, 'n': 0.89185845355421e-24},
-                36: {'I': 20, 'J': 35, 'n': 0.30629316876232e-12},
-                37: {'I': 20, 'J': 48, 'n': -0.42002467698208e-5},
-                38: {'I': 21, 'J': 21, 'n': -0.59056029685639e-25},
-                39: {'I': 22, 'J': 53, 'n': 0.37826947613457e-5},
-                40: {'I': 23, 'J': 39, 'n': -0.12768608934681e-14},
-                41: {'I': 24, 'J': 26, 'n': 0.73087610595061e-28},
-                42: {'I': 24, 'J': 40, 'n': 0.55414715350778e-16},
-                43: {'I': 24, 'J': 58, 'n': -0.94369707241210e-6}}
+               2: {'I': 1, 'J': 1, 'n': -0.17834862292358e-1},
+               3: {'I': 1, 'J': 2, 'n': -0.45996013696365e-1},
+               4: {'I': 1, 'J': 3, 'n': -0.57581259083432e-1},
+               5: {'I': 1, 'J': 6, 'n': -0.50325278727930e-1},
+               6: {'I': 2, 'J': 1, 'n': -0.33032641670203e-4},
+               7: {'I': 2, 'J': 2, 'n': -0.18948987516315e-3},
+               8: {'I': 2, 'J': 4, 'n': -0.39392777243355e-2},
+               9: {'I': 2, 'J': 7, 'n': -0.43797295650573e-1},
+               10: {'I': 2, 'J': 36, 'n': -0.26674547914087e-4},
+               11: {'I': 3, 'J': 0, 'n': 0.20481737692309e-7},
+               12: {'I': 3, 'J': 1, 'n': 0.43870667284435e-6},
+               13: {'I': 3, 'J': 3, 'n': -0.32277677238570e-4},
+               14: {'I': 3, 'J': 6, 'n': -0.15033924542148e-2},
+               15: {'I': 3, 'J': 35, 'n': -0.40668253562649e-1},
+               16: {'I': 4, 'J': 1, 'n': -0.78847309559367e-9},
+               17: {'I': 4, 'J': 2, 'n': 0.12790717852285e-7},
+               18: {'I': 4, 'J': 3, 'n': 0.48225372718507e-6},
+               19: {'I': 5, 'J': 7, 'n': 0.22922076337661e-5},
+               20: {'I': 6, 'J': 3, 'n': -0.16714766451061e-10},
+               21: {'I': 6, 'J': 16, 'n': -0.21171472321355e-2},
+               22: {'I': 6, 'J': 35, 'n': -0.23895741934104e2},
+               23: {'I': 7, 'J': 0, 'n': -0.59059564324270e-17},
+               24: {'I': 7, 'J': 11, 'n': -0.12621808899101e-5},
+               25: {'I': 7, 'J': 25, 'n': -0.38946842435739e-1},
+               26: {'I': 8, 'J': 8, 'n': 0.11256211360459e-10},
+               27: {'I': 8, 'J': 36, 'n': -0.82311340897998e1},
+               28: {'I': 9, 'J': 13, 'n': 0.19809712802088e-7},
+               29: {'I': 10, 'J': 4, 'n': 0.10406965210174e-18},
+               30: {'I': 10, 'J': 10, 'n': -0.10234747095929e-12},
+               31: {'I': 10, 'J': 14, 'n': -0.10018179379511e-8},
+               32: {'I': 16, 'J': 29, 'n': -0.80882908646985e-10},
+               33: {'I': 16, 'J': 50, 'n': 0.10693031879409},
+               34: {'I': 18, 'J': 57, 'n': -0.33662250574171},
+               35: {'I': 20, 'J': 20, 'n': 0.89185845355421e-24},
+               36: {'I': 20, 'J': 35, 'n': 0.30629316876232e-12},
+               37: {'I': 20, 'J': 48, 'n': -0.42002467698208e-5},
+               38: {'I': 21, 'J': 21, 'n': -0.59056029685639e-25},
+               39: {'I': 22, 'J': 53, 'n': 0.37826947613457e-5},
+               40: {'I': 23, 'J': 39, 'n': -0.12768608934681e-14},
+               41: {'I': 24, 'J': 26, 'n': 0.73087610595061e-28},
+               42: {'I': 24, 'J': 40, 'n': 0.55414715350778e-16},
+               43: {'I': 24, 'J': 58, 'n': -0.94369707241210e-6}}
 
     table_10_meta = {1: {'J': 0, 'n': -0.96937268393049e1},
-                2: {'J': 1, 'n': 0.10087275970006e2},
-                3: {'J': -5, 'n': -0.56087911283020e-2},
-                4: {'J': -4, 'n': 0.71452738081455e-1},
-                5: {'J': -3, 'n': -0.40710498223928},
-                6: {'J': -2, 'n': 0.14240819171444e1},
-                7: {'J': -1, 'n': -0.43839511319450e1},
-                8: {'J': 2, 'n': -0.28408632460772},
-                9: {'J': 3, 'n': 0.21268463753307e-1}}
+                     2: {'J': 1, 'n': 0.10087275970006e2},
+                     3: {'J': -5, 'n': -0.56087911283020e-2},
+                     4: {'J': -4, 'n': 0.71452738081455e-1},
+                     5: {'J': -3, 'n': -0.40710498223928},
+                     6: {'J': -2, 'n': 0.14240819171444e1},
+                     7: {'J': -1, 'n': -0.43839511319450e1},
+                     8: {'J': 2, 'n': -0.28408632460772},
+                     9: {'J': 3, 'n': 0.21268463753307e-1}}
 
     table16 = {1: {'I': 1, 'J': 0, 'n': -0.73362260186506e-2},
                2: {'I': 1, 'J': 2, 'n': -0.88223831943146e-1},
@@ -114,10 +117,10 @@ class Region2(Region):
                13: {'I': 5, 'J': 10, 'n': -0.26456501482810e-2}}
 
     b23_const = {1: 0.348_051_856_289_69e3,
-                2: -0.116_718_598_799_75e1,
-                3: 0.101_929_700_393_26e-2,
-                4: 0.572_544_598_627_46e3,
-                5: 0.139_188_397_788_70e2}
+                 2: -0.116_718_598_799_75e1,
+                 3: 0.101_929_700_393_26e-2,
+                 4: 0.572_544_598_627_46e3,
+                 5: 0.139_188_397_788_70e2}
 
     b23bc_const = {1: 0.90584278514723e3,
                    2: -0.67955786399241,
@@ -200,28 +203,28 @@ class Region2(Region):
                38: {'I': 9, 'J': 40, 'n': 0.86934156344163e-14}}
 
     table22 = {1: {'I': -7, 'J': 0, 'n': -0.32368398555242e13},
-                2: {'I': -7, 'J': 4, 'n': 0.73263350902181e13},
-                3: {'I': -6, 'J': 0, 'n': 0.35825089945447e12},
-                4: {'I': -6, 'J': 2, 'n': -0.58340131851590e12},
-                5: {'I': -5, 'J': 0, 'n': -0.10783068217470e11},
-                6: {'I': -5, 'J': 2, 'n': 0.20825544563171e11},
-                7: {'I': -2, 'J': 0, 'n': 0.61074783564516e6},
-                8: {'I': -2, 'J': 1, 'n': 0.85977722535580e6},
-                9: {'I': -1, 'J': 0, 'n': -0.25745723604170e5},
-                10: {'I': -1, 'J': 2, 'n': 0.31081088422714e5},
-                11: {'I': 0, 'J': 0, 'n': 0.12082315865936e4},
-                12: {'I': 0, 'J': 1, 'n': 0.48219755109255e3},
-                13: {'I': 1, 'J': 4, 'n': 0.37966001272486e1},
-                14: {'I': 1, 'J': 8, 'n': -0.10842984880077e2},
-                15: {'I': 2, 'J': 4, 'n': -0.45364172676660e-1},
-                16: {'I': 6, 'J': 0, 'n': 0.14559115658698e-12},
-                17: {'I': 6, 'J': 1, 'n': 0.11261597407230e-11},
-                18: {'I': 6, 'J': 4, 'n': -0.17804982240686e-10},
-                19: {'I': 6, 'J': 10, 'n': 0.12324579690832e-6},
-                20: {'I': 6, 'J': 12, 'n': -0.11606921130984e-5},
-                21: {'I': 6, 'J': 16, 'n': 0.27846367088554e-4},
-                22: {'I': 6, 'J': 20, 'n': -0.59270038474176e-3},
-                23: {'I': 6, 'J': 22, 'n': 0.12918582991878e-2}}
+               2: {'I': -7, 'J': 4, 'n': 0.73263350902181e13},
+               3: {'I': -6, 'J': 0, 'n': 0.35825089945447e12},
+               4: {'I': -6, 'J': 2, 'n': -0.58340131851590e12},
+               5: {'I': -5, 'J': 0, 'n': -0.10783068217470e11},
+               6: {'I': -5, 'J': 2, 'n': 0.20825544563171e11},
+               7: {'I': -2, 'J': 0, 'n': 0.61074783564516e6},
+               8: {'I': -2, 'J': 1, 'n': 0.85977722535580e6},
+               9: {'I': -1, 'J': 0, 'n': -0.25745723604170e5},
+               10: {'I': -1, 'J': 2, 'n': 0.31081088422714e5},
+               11: {'I': 0, 'J': 0, 'n': 0.12082315865936e4},
+               12: {'I': 0, 'J': 1, 'n': 0.48219755109255e3},
+               13: {'I': 1, 'J': 4, 'n': 0.37966001272486e1},
+               14: {'I': 1, 'J': 8, 'n': -0.10842984880077e2},
+               15: {'I': 2, 'J': 4, 'n': -0.45364172676660e-1},
+               16: {'I': 6, 'J': 0, 'n': 0.14559115658698e-12},
+               17: {'I': 6, 'J': 1, 'n': 0.11261597407230e-11},
+               18: {'I': 6, 'J': 4, 'n': -0.17804982240686e-10},
+               19: {'I': 6, 'J': 10, 'n': 0.12324579690832e-6},
+               20: {'I': 6, 'J': 12, 'n': -0.11606921130984e-5},
+               21: {'I': 6, 'J': 16, 'n': 0.27846367088554e-4},
+               22: {'I': 6, 'J': 20, 'n': -0.59270038474176e-3},
+               23: {'I': 6, 'J': 22, 'n': 0.12918582991878e-2}}
 
     table25 = {1: {'I': -1.5, 'J': -24, 'n': -0.39235983861984e6},
                2: {'I': -1.5, 'J': -23, 'n': 0.51526573827270e6},
@@ -445,7 +448,8 @@ class Region2(Region):
                    30: {'I': 12, 'J': 7, 'n': -0.296492620980124e11},
                    31: {'I': 16, 'J': 10, 'n': -0.111754907323424e16}}
 
-    def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
+    def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None,
+                 s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region3` check can be performed easily.
         """
@@ -479,18 +483,22 @@ class Region2(Region):
             self._state.p = p
             self._state.s = s
         elif T and h:
-            pass
+            self._state.T = T
+            self._state.p = self.p_Th(T=T, h=h)
+            self._state.h = h
         elif T and s:
-            pass
+            self._state.T = T
+            self._state.p = self.p_Ts(T=T, s=s)
+            self._state.s = s
         elif h and s:
             self._state.p = self.p_hs(h, s)
             self._state.T = self.T_ph(p, h)
             self._state.s = s
             self._state.h = h
         else:
-            raise ValueError('You should only pass one of the following combinations to determine a state in Reg2: (p,T) (p, h), (p, s), (T, h), (T,s), (h, s).')
-        
-        
+            raise ValueError(
+                'You should only pass one of the following combinations to determine a state in Reg2: (p,T) (p, h), (p, s), (T, h), (T,s), (h, s).')
+
         if calc:
             tau = 540 / T
             _pi = p / 1
@@ -508,15 +516,17 @@ class Region2(Region):
             gtO, gtR = Region2.base_id_gas_der_tau_const_pi(T=T, p=p), Region2.base_residual_der_tau_const_pi(T=T, p=p)
             gt = gtO + gtR
 
-            gppO, gppR = Region2.base_id_gas_der2_pipi_const_tau(T=T, p=p), Region2.base_residual_der2_pipi_const_tau(T=T, p=p)
+            gppO, gppR = Region2.base_id_gas_der2_pipi_const_tau(T=T, p=p), Region2.base_residual_der2_pipi_const_tau(
+                T=T, p=p)
             gpp = gppO + gppR
 
-            gttO, gttR = Region2.base_id_gas_der2_tautau_const_pi(T=T, p=p), Region2.base_residual_der2_tautau_const_pi(T=T, p=p)
+            gttO, gttR = Region2.base_id_gas_der2_tautau_const_pi(T=T, p=p), Region2.base_residual_der2_tautau_const_pi(
+                T=T, p=p)
             gtt = gttO + gttR
 
             gptO, gptR = Region2.base_id_gas_der2_pitau(T=T, p=p), Region2.base_residual_der2_pitau(T=T, p=p)
             gpt = gptO + gptR
-            
+
             self._state.ders = defaultdict(float,
                                            gammaO=ggO, gammaR=ggR, gamma=gg,
                                            gammaO_pi=gpO, gammaR_pi=gpO, gamma_pi=gp,
@@ -527,12 +537,13 @@ class Region2(Region):
 
             self._state.v = _pi * gp * R * T / p / 1000  # R*T/p has units of 1000 m^3/kg.
             self._state.rho = 1 / self._state.v
-            self._state.u = R * T * (tau*gt - _pi*gp)
-            self._state.s = self._state.s if self._state.s is not None else R * (tau*gt - gg)
+            self._state.u = R * T * (tau * gt - _pi * gp)
+            self._state.s = self._state.s if self._state.s is not None else R * (tau * gt - gg)
             self._state.h = self._state.h if self._state.h is not None else R * T * tau * gt
-            self._state.cp = R * -tau**2 * gtt
-            self._state.cv = R * (-tau**2 * gtt - (1 + _pi * gpR - tau * _pi * gptR)**2 / (1 - _pi**2 * gppR))
-            self._state.w = np.sqrt(1000 * R * T * gp**2 / ((gp-tau*gpt)**2 / (tau**2 * gtt) - gpp))  # 1000 is a conversion factor: sqrt(kJ/kg) = sqrt(1000 m/s) -> sqrt(1000) m/s
+            self._state.cp = R * -tau ** 2 * gtt
+            self._state.cv = R * (-tau ** 2 * gtt - (1 + _pi * gpR - tau * _pi * gptR) ** 2 / (1 - _pi ** 2 * gppR))
+            self._state.w = np.sqrt(1000 * R * T * gp ** 2 / ((gp - tau * gpt) ** 2 / (
+                        tau ** 2 * gtt) - gpp))  # 1000 is a conversion factor: sqrt(kJ/kg) = sqrt(1000 m/s) -> sqrt(1000) m/s
         else:
             self._state = State()
 
@@ -549,8 +560,8 @@ class Region2(Region):
         """
         if not 623.15 <= T <= 863.15:
             raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
-        return  Region2.b23_const[1] + Region2.b23_const[2] * T + Region2.b23_const[3] * T**2
-    
+        return Region2.b23_const[1] + Region2.b23_const[2] * T + Region2.b23_const[3] * T ** 2
+
     @staticmethod
     def T_b23(p: float) -> float:
         """
@@ -564,10 +575,10 @@ class Region2(Region):
         """
         if not 16.5292 <= p <= 100:
             raise ValueError(f'T must be in the range [623.15, 863.15]. {T}K supplied.')
-        return  Region2.b23_const[4] + np.sqrt( (p - Region2.b23_const[5]) / Region2.b23_const[3] )
+        return Region2.b23_const[4] + np.sqrt((p - Region2.b23_const[5]) / Region2.b23_const[3])
 
     @staticmethod
-    def b2bc(p:Optional[float] = None, h: Optional[float] = None) -> str:
+    def b2bc(p: Optional[float] = None, h: Optional[float] = None) -> str:
         """
         Implements the equation for the boundaries in subregions of region 2 (eqns 20 and 21).
         Args:
@@ -580,14 +591,14 @@ class Region2(Region):
         """
         # TODO: Page 21 limits?
         if h is not None and p is None:
-            _pi = Region2.b23bc_const[1] + Region2.b23bc_const[2] * h + Region2.b23bc_const[3] * h**2
-            return  _pi
+            _pi = Region2.b23bc_const[1] + Region2.b23bc_const[2] * h + Region2.b23bc_const[3] * h ** 2
+            return _pi
         elif p is not None and h is None:
-            eta = Region2.b23bc_const[4] + np.sqrt( (p - Region2.b23bc_const[5]) / Region2.b23bc_const[3] )
-            return  eta
+            eta = Region2.b23bc_const[4] + np.sqrt((p - Region2.b23bc_const[5]) / Region2.b23bc_const[3])
+            return eta
         else:
             raise ValueError('Pass only T or P, not both.')
-    
+
     @staticmethod
     def h_2ab(s: float) -> float:
         """
@@ -597,7 +608,8 @@ class Region2(Region):
         Returns:
             The value of the enthalpy in region 2 for a given entropy.
         """
-        return Region2.table5_supp[1] + Region2.table5_supp[2] * s + Region2.table5_supp[3] * s**2 + Region2.table5_supp[4] * s**3
+        return Region2.table5_supp[1] + Region2.table5_supp[2] * s + Region2.table5_supp[3] * s ** 2 + \
+               Region2.table5_supp[4] * s ** 3
 
     @staticmethod
     def subregion(p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> str:
@@ -612,7 +624,7 @@ class Region2(Region):
         Raises:
             ValueError if an erroneous pair is provided.
         """
-        #TODO: Probably check if value is in fact in region2?
+        # TODO: Probably check if value is in fact in region2?
         if h is not None and s is not None and p is None:
             if s < 5.85:
                 return 'c'
@@ -686,7 +698,7 @@ class Region2(Region):
             Ideal gas part of the dimensionless specific Gibbs free energy.
         """
         tau = 540 / T
-        return np.log(p) + sum(entry['n'] * tau**entry['J'] for entry in Region2.table10.values())
+        return np.log(p) + sum(entry['n'] * tau ** entry['J'] for entry in Region2.table10.values())
 
     @staticmethod
     def base_eqn_residual(T: float, p: float) -> float:
@@ -699,8 +711,8 @@ class Region2(Region):
             Residual part of the dimensionless specific Gibbs free energy.
         """
         tau = 540 / T
-        return sum(entry['n'] * p**entry['I'] * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
-    
+        return sum(entry['n'] * p ** entry['I'] * (tau - 0.5) ** entry['J'] for entry in Region2.table11.values())
+
     #############################################################
     ################## FIRST ORDER DERIVATIVES ##################
     #############################################################
@@ -714,7 +726,7 @@ class Region2(Region):
         Returns:
             Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `pi` with consant `tau`
         """
-        return 1/p
+        return 1 / p
 
     @staticmethod
     def base_residual_der_pi_const_tau(T: float, p: float) -> float:
@@ -727,7 +739,8 @@ class Region2(Region):
             Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
         """
         tau = 540 / T
-        return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
+        return sum(entry['n'] * entry['I'] * p ** (entry['I'] - 1) * (tau - 0.5) ** entry['J'] for entry in
+                   Region2.table11.values())
 
     @staticmethod
     def base_id_gas_der_tau_const_pi(T: float, p: float) -> float:
@@ -740,8 +753,8 @@ class Region2(Region):
             Derivative of Ideal gas part of dimensionless specific Gibbs free energy (`gammaO`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
-        return sum(entry['n'] * entry['J'] * tau**(entry['J'] - 1) for entry in Region2.table10.values())
-    
+        return sum(entry['n'] * entry['J'] * tau ** (entry['J'] - 1) for entry in Region2.table10.values())
+
     @staticmethod
     def base_residual_der_tau_const_pi(T: float, p: float) -> float:
         """Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
@@ -753,7 +766,8 @@ class Region2(Region):
             Derivative of residual part of dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
-        return sum(entry['n'] * p**entry['I'] * entry['J'] * (tau - 0.5)**(entry['J'] - 1) for entry in Region2.table11.values())
+        return sum(entry['n'] * p ** entry['I'] * entry['J'] * (tau - 0.5) ** (entry['J'] - 1) for entry in
+                   Region2.table11.values())
 
     #############################################################
     ################# SECOND ORDER DERIVATIVES ##################
@@ -767,8 +781,8 @@ class Region2(Region):
         Returns:
             Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`
         """
-        return -1/p**2
-    
+        return -1 / p ** 2
+
     @staticmethod
     def base_id_gas_der2_tautau_const_pi(T: float, p: float) -> float:
         """Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
@@ -779,8 +793,9 @@ class Region2(Region):
             Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
-        return sum(entry['n'] * entry['J'] * (entry['J'] -1) * tau**(entry['J'] - 2) for entry in Region2.table10.values())
-    
+        return sum(
+            entry['n'] * entry['J'] * (entry['J'] - 1) * tau ** (entry['J'] - 2) for entry in Region2.table10.values())
+
     @staticmethod
     def base_id_gas_der2_pitau(T: float, p: float) -> float:
         """Second order derivative of Ideal gas part of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` and then `tau`
@@ -802,8 +817,10 @@ class Region2(Region):
             Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` with consant `tau`
         """
         tau = 540 / T
-        return sum(entry['n'] * entry['I'] * (entry['I'] - 1) * p **(entry['I'] - 2) * (tau - 0.5)**entry['J'] for entry in Region2.table11.values())
-    
+        return sum(
+            entry['n'] * entry['I'] * (entry['I'] - 1) * p ** (entry['I'] - 2) * (tau - 0.5) ** entry['J'] for entry in
+            Region2.table11.values())
+
     @staticmethod
     def base_residual_der2_tautau_const_pi(T: float, p: float) -> float:
         """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
@@ -814,8 +831,10 @@ class Region2(Region):
             Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `tau` with consant `pi`
         """
         tau = 540 / T
-        return sum(entry['n'] * p**entry['I'] * entry['J'] * (entry['J'] - 1) * (tau - 0.5)**(entry['J'] - 2) for entry in Region2.table11.values())
-    
+        return sum(
+            entry['n'] * p ** entry['I'] * entry['J'] * (entry['J'] - 1) * (tau - 0.5) ** (entry['J'] - 2) for entry in
+            Region2.table11.values())
+
     @staticmethod
     def base_residual_der2_pitau(T: float, p: float) -> float:
         """Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` and then `tau`
@@ -826,7 +845,9 @@ class Region2(Region):
             Second order derivative of residual of Dimensionless specific Gibbs free energy (`gammaR`) with respect to `pi` and then `tau`
         """
         tau = 540 / T
-        return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * entry['J'] * (tau - 0.5)**(entry['J'] - 1) for entry in Region2.table11.values())
+        return sum(
+            entry['n'] * entry['I'] * p ** (entry['I'] - 1) * entry['J'] * (tau - 0.5) ** (entry['J'] - 1) for entry in
+            Region2.table11.values())
 
     #############################################################
     ####################### Properties ##########################
@@ -840,7 +861,7 @@ class Region2(Region):
     def gammaO(self) -> float:
         """Dimensionless specific Gibbs free energy ideal gas(eq. 16)."""
         return self._state.ders['gammaO']
-    
+
     @property
     def gammaR(self) -> float:
         """Dimensionless specific Gibbs free energy residual (eq. 17)."""
@@ -850,7 +871,7 @@ class Region2(Region):
     def gamma_pi(self) -> float:
         """Derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `pi` with consant `tau`"""
         return self._state.ders['gamma_pi']
-    
+
     @property
     def gammaO_pi(self) -> float:
         """Ideal gas part of the derivative of gamma with respect to pi."""
@@ -895,11 +916,12 @@ class Region2(Region):
     def gamma_tautau(self) -> float:
         """Second order derivative of Dimensionless specific Gibbs free energy (`gamma`) with respect to `tau` with consant `pi`"""
         return self.self._state.ders['gamma_tautau']
-    
+
     @property
     def gammaO_tautau(self) -> float:
         """Idel gas part of the second order derivative of gamma with respect to pi twice."""
         return self.self._state.ders['gammaO_tautau']
+
     @property
     def gammaR_tautau(self) -> float:
         """Residual part of the second order derivative of gamma with respect to tau twice."""
@@ -939,12 +961,12 @@ class Region2(Region):
     def v(self) -> float:
         """Specific volume in m^3/kg"""
         return self._state.v
-    
+
     @property
     def rho(self) -> float:
         """Density in kg/m^3"""
         return self._state.rho
-    
+
     @property
     def u(self) -> float:
         """Specific internal energy in kJ/kg"""
@@ -954,7 +976,7 @@ class Region2(Region):
     def s(self) -> float:
         """Specific entropy in kJ/kg/K"""
         return self._state.s
-    
+
     @property
     def h(self) -> float:
         """Specific enthalpy in kJ/kg"""
@@ -969,7 +991,7 @@ class Region2(Region):
     def cv(self) -> float:
         """Specific isochoric heat capacity kJ/kg/K"""
         return self._state.cv
-    
+
     @property
     def w(self) -> float:
         """Speed of sound in m/s"""
@@ -990,16 +1012,15 @@ class Region2(Region):
         eta = h / 2000
         reg = self.subregion(p=p, h=h)
         if reg == 'a':
-            T = sum(entry['n'] * p**entry['I'] * (eta - 2.1)**entry['J'] for entry in Region2.table20.values())
+            T = sum(entry['n'] * p ** entry['I'] * (eta - 2.1) ** entry['J'] for entry in Region2.table20.values())
         elif reg == 'b':
-            T = sum(entry['n'] * (p - 2)**entry['I'] * (eta - 2.6)**entry['J'] for entry in Region2.table21.values())
+            T = sum(
+                entry['n'] * (p - 2) ** entry['I'] * (eta - 2.6) ** entry['J'] for entry in Region2.table21.values())
         elif reg == 'c':
-            T = sum(entry['n'] * (p + 25)**entry['I'] * (eta - 1.8)**entry['J'] for entry in Region2.table22.values())
+            T = sum(
+                entry['n'] * (p + 25) ** entry['I'] * (eta - 1.8) ** entry['J'] for entry in Region2.table22.values())
 
-        if State(p=p, T=T) in self:
-            return T
-        else:
-            raise ValueError(f'State out of bounds. {T}')
+        return T
 
     def T_ps(self, p: float, s: float) -> float:
         """
@@ -1013,50 +1034,16 @@ class Region2(Region):
         reg = self.subregion(p=p, s=s)
         if reg == 'a':
             sigma = s / 2
-            T = sum(entry['n'] * p**entry['I'] * (sigma - 2)**entry['J'] for entry in Region2.table25.values())
+            T = sum(entry['n'] * p ** entry['I'] * (sigma - 2) ** entry['J'] for entry in Region2.table25.values())
         elif reg == 'b':
             sigma = s / 0.7853
-            T = sum(entry['n'] * p**entry['I'] * (10 - sigma)**entry['J'] for entry in Region2.table26.values())
+            T = sum(entry['n'] * p ** entry['I'] * (10 - sigma) ** entry['J'] for entry in Region2.table26.values())
         elif reg == 'c':
             sigma = s / 2.9251
-            T = sum(entry['n'] * p**entry['I'] * (2 - sigma)**entry['J'] for entry in Region2.table27.values())
+            T = sum(entry['n'] * p ** entry['I'] * (2 - sigma) ** entry['J'] for entry in Region2.table27.values())
 
         if State(p=p, T=T) in self:
             return T
-        else:
-            raise ValueError(f'State out of bounds. {p},{T}')
-
-    def p_hs(self, h: float, s: float) -> float:
-        """
-        Backwards equation 1 from [1] for calculating pressure as a function of enthalpy and entropy.
-        Args:
-            h: Enthalpy (kJ/kg).
-            s: Entropy (kJ/kg/K).
-        Returns:
-            Pressure (MPa).
-        References:
-            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
-        """
-        reg = self.subregion(h=h, s=s)
-        if reg == 'a':
-            sigma = s / 12
-            eta = h / 4200
-            _pi = sum(entry['n'] * (eta - 0.5)**entry['I'] * (sigma - 1.2)**entry['J'] for entry in Region2.table6_supp.values()) **4
-            p = 4 * _pi
-        elif reg == 'b':
-            sigma = s / 7.9
-            eta = h / 4100
-            _pi = sum(entry['n'] * (eta - 0.6)**entry['I'] * (sigma - 1.01)**entry['J'] for entry in Region2.table7_supp.values()) **4
-            p = 100 * _pi
-        elif reg == 'c':
-            sigma = s / 5.9
-            eta = h / 3500
-            _pi = sum(entry['n'] * (eta - 0.7)**entry['I'] * (sigma - 1.1)**entry['J'] for entry in Region2.table8_supp.values()) **4
-            p = 100 * _pi
-
-        T = self.T_ph(p=p, h=h)
-        if State(p=p, T=T) in self:
-            return p
         else:
             raise ValueError(f'State out of bounds. {p},{T}')
 
@@ -1073,3 +1060,105 @@ class Region2(Region):
         """
         p = self.p_hs(h, s)
         return self.T_ph(p, h)
+
+    def p_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation 1 from [1] for calculating pressure as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Pressure (MPa).
+        References:
+            http://www.iapws.org/relguide/Supp-VPT3-2016.pdf
+        """
+        reg = self.subregion(h=h, s=s)
+        if reg == 'a':
+            sigma = s / 12
+            eta = h / 4200
+            _pi = sum(entry['n'] * (eta - 0.5) ** entry['I'] * (sigma - 1.2) ** entry['J'] for entry in
+                      Region2.table6_supp.values()) ** 4
+            p = 4 * _pi
+        elif reg == 'b':
+            sigma = s / 7.9
+            eta = h / 4100
+            _pi = sum(entry['n'] * (eta - 0.6) ** entry['I'] * (sigma - 1.01) ** entry['J'] for entry in
+                      Region2.table7_supp.values()) ** 4
+            p = 100 * _pi
+        elif reg == 'c':
+            sigma = s / 5.9
+            eta = h / 3500
+            _pi = sum(entry['n'] * (eta - 0.7) ** entry['I'] * (sigma - 1.1) ** entry['J'] for entry in
+                      Region2.table8_supp.values()) ** 4
+            p = 100 * _pi
+
+        T = self.T_ph(p=p, h=h)
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds. {p},{T}')
+
+    def p_Th(self, T: float, h: float) -> float:
+        """
+        Backwards equation for calculating pressure as a function of Temperature and enthalpy.
+        Beware that this calculation might be time consuming as it is performing iteration (no backwards equation is provided by IAPWS).
+        Args:
+            T: Temperature (K).
+            h: Enthalpy (kJ/kg).
+        Returns:
+            Pressure (MPa).
+        """
+
+        def f(p):
+            return self.T_ph(p, h) - T
+
+        if 273.15 <= T <= 623.15:
+            p0 = np.array([(611.213e-6 + _p_s(T=T)) / 2])
+        elif 623.15 <= T <= 863.15:
+            p0 = np.array([(611.213e-6 + Region2.p_b23(T=T)) / 2])
+        else:
+            p0 = np.array([50.])
+
+        p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
+
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds.')
+
+    def p_Ts(self, T: float, s: float) -> float:
+        """
+        Backwards equation for calculating pressure as a function of Temperature and Entropy.
+        Beware that this calculation might be time consuming as it is performing iteration (no backwards equation is provided by IAPWS).
+        Args:
+            T: Temperature (K).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Pressure (MPa).
+        """
+
+        def f(p):
+            return self.T_ps(p, s) - T
+
+        if 273.15 <= T <= 623.15:
+            p0 = np.array([(611.213e-6 + _p_s(T=T)) / 2])
+        elif 623.15 <= T <= 863.15:
+            p0 = np.array([(611.213e-6 + Region2.p_b23(T=T)) / 2])
+        else:
+            p0 = np.array([50.0])
+
+        p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
+
+        if State(p=p, T=T) in self:
+            return p
+        else:
+            raise ValueError(f'State out of bounds.')
+
+
+regions = dict(a={'h': [3000, 3000, 4000], 'p': [0.001, 3, 3], 'T': [0.534433241e3, 0.575373370e3, 0.101077577e4]},
+               b={'p': [5, 5, 25], 'h': [3500, 4000, 3500], 'T': [0.801299102e3, 0.101531583e4, 0.875279054e3]},
+               c={'p': [40, 60, 60], 'h': [2700, 2700, 3200], 'T': [0.743056411e3, 0.791137067e3, 0.882756860e3]})
+r = Region2()
+print(r.p_Th(T=regions['a']['T'][0], h=regions['a']['h'][0]))
+
+# TODO: Probably remove all the if state in self checks in backwards calls to allow fsolve to work. On instantiation, perform calculations and check if state is in self. Raise exeption if it isn't and recommend a class.

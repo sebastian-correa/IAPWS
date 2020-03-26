@@ -491,16 +491,12 @@ class Region1(Region):
         Returns:
             Pressure (MPa).
         """
-        eta = h / 2500
 
         def f(p):
             return self.T_ph(p, h) - T
 
-        def fp(p):
-            return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (eta + 1)**entry['J'] for entry in Region1.table6.values())
-
         p0 = (_p_s(T=T) + 100) / 2
-        p = fsolve(f, p0, fprime=fp)  # initial p guess from region boundaries (see __contains__).
+        p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
 
         if State(p=p, T=T) in self:
             return p
@@ -521,11 +517,8 @@ class Region1(Region):
         def f(p):
             return self.T_ps(p, s) - T
 
-        def fp(p):
-            return sum(entry['n'] * entry['I'] * p**(entry['I'] - 1) * (s + 2)**entry['J'] for entry in Region1.table8.values())
-
         p0 = (_p_s(T=T) + 100) / 2
-        p = fsolve(f, p0, fprime=fp)  # initial p guess from region boundaries (see __contains__).
+        p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
 
         if State(p=p, T=T) in self:
             return p
