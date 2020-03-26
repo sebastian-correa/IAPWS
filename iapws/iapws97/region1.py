@@ -493,9 +493,9 @@ class Region1(Region):
         """
 
         def f(p):
-            return self.T_ph(p, h) - T
+            return self.T_ph(p[0], h) - T  # Add [0] because fsolve iterates p as an np.array and _p_s doesn't like np.arrays because of np.sqrt.
 
-        p0 = (_p_s(T=T) + 100) / 2
+        p0 = np.array([(_p_s(T=T) + 100) / 2])
         p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
 
         if State(p=p, T=T) in self:
@@ -515,7 +515,7 @@ class Region1(Region):
         """
 
         def f(p):
-            return self.T_ps(p, s) - T
+            return self.T_ps(p[0], s) - T  # Add [0] because fsolve iterates p as an np.array and _p_s doesn't like np.arrays because of np.sqrt.
 
         p0 = (_p_s(T=T) + 100) / 2
         p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).

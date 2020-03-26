@@ -1110,7 +1110,7 @@ class Region2(Region):
         """
 
         def f(p):
-            return self.T_ph(p, h) - T
+            return self.T_ph(p[0], h) - T  # Add [0] because fsolve iterates p as an np.array and _p_s doesn't like np.arrays because of np.sqrt.
 
         if 273.15 <= T <= 623.15:
             p0 = np.array([(611.213e-6 + _p_s(T=T)) / 2])
@@ -1138,7 +1138,7 @@ class Region2(Region):
         """
 
         def f(p):
-            return self.T_ps(p, s) - T
+            return self.T_ps(p[0], s) - T  # Add [0] because fsolve iterates p as an np.array and _p_s doesn't like np.arrays because of np.sqrt.
 
         if 273.15 <= T <= 623.15:
             p0 = np.array([(611.213e-6 + _p_s(T=T)) / 2])
