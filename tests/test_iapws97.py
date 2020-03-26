@@ -244,16 +244,16 @@ class TestRegion2(unittest.TestCase):
         regions = {'a': {'s': [7.5, 8, 8], 'p': [0.1, 0.1, 2.5], 'T': [0.399517097e3, 0.514127081e3, 0.103984917e4]},
             'b': {'p': [8, 8, 90], 's': [6, 7.5, 6], 'T': [0.600484040e3, 0.106495556e4, 0.103801126e4]},
             'c': {'p': [20, 80, 80], 's': [5.75, 5.25, 5.75], 'T': [0.697992849e3, 0.854011484e3, 0.949017998e3]}}
+        r = Region2()
         for reg, vals in regions.items():
             ss = vals['s']
             ps = vals['p']
             ts = vals['T']
 
             for p, s, T in zip(ps, ss, ts):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
-                p_calc = Region2().p_Ts(T=T, s=s)
-                self.assertAlmostEqual(p, p_calc, places=4)
+                self.assertRaises(r.p_Ts(T=T, s=s), NotImplementedError)
+                # p_calc = r.p_Ts(T=T, s=s)
+                # self.assertAlmostEqual(p, p_calc, places=4)
 
     def test_backwards_p_hs(self):
         # From table 9 of supplement for p(h,s).

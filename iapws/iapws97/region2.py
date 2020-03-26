@@ -1,8 +1,10 @@
+import warnings
+
 import numpy as np
 from typing import Optional, Dict
 from collections import defaultdict
 
-from scipy.optimize import fsolve
+from scipy.optimize import fsolve, newton, bisect
 
 from ._utils import State, Region, R, _p_s
 
@@ -1020,6 +1022,9 @@ class Region2(Region):
             T = sum(
                 entry['n'] * (p + 25) ** entry['I'] * (eta - 1.8) ** entry['J'] for entry in Region2.table22.values())
 
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
         return T
 
     def T_ps(self, p: float, s: float) -> float:
@@ -1042,10 +1047,10 @@ class Region2(Region):
             sigma = s / 2.9251
             T = sum(entry['n'] * p ** entry['I'] * (2 - sigma) ** entry['J'] for entry in Region2.table27.values())
 
-        if State(p=p, T=T) in self:
-            return T
-        else:
-            raise ValueError(f'State out of bounds. {p},{T}')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return T
 
     def T_hs(self, h: float, s: float) -> float:
         """
@@ -1093,10 +1098,10 @@ class Region2(Region):
             p = 100 * _pi
 
         T = self.T_ph(p=p, h=h)
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds. {p},{T}')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return p
 
     def p_Th(self, T: float, h: float) -> float:
         """
@@ -1110,21 +1115,21 @@ class Region2(Region):
         """
 
         def f(p):
-            return self.T_ph(p[0], h) - T  # Add [0] because fsolve iterates p as an np.array and _p_s doesn't like np.arrays because of np.sqrt.
+            return self.T_ph(p, h) - T
 
         if 273.15 <= T <= 623.15:
-            p0 = np.array([(611.213e-6 + _p_s(T=T)) / 2])
+            p0 = (611.213e-6 + _p_s(T=T)) / 2
         elif 623.15 <= T <= 863.15:
-            p0 = np.array([(611.213e-6 + Region2.p_b23(T=T)) / 2])
+            p0 = (611.213e-6 + Region2.p_b23(T=T)) / 2
         else:
-            p0 = np.array([50.])
+            p0 = 50.
 
-        p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
+        p = newton(f, p0)  # initial p guess from region boundaries (see __contains__).
 
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds.')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return p
 
     def p_Ts(self, T: float, s: float) -> float:
         """
@@ -1136,29 +1141,25 @@ class Region2(Region):
         Returns:
             Pressure (MPa).
         """
-
-        def f(p):
-            return self.T_ps(p[0], s) - T  # Add [0] because fsolve iterates p as an np.array and _p_s doesn't like np.arrays because of np.sqrt.
-
-        if 273.15 <= T <= 623.15:
-            p0 = np.array([(611.213e-6 + _p_s(T=T)) / 2])
-        elif 623.15 <= T <= 863.15:
-            p0 = np.array([(611.213e-6 + Region2.p_b23(T=T)) / 2])
-        else:
-            p0 = np.array([50.0])
-
-        p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
-
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds.')
-
-
-regions = dict(a={'h': [3000, 3000, 4000], 'p': [0.001, 3, 3], 'T': [0.534433241e3, 0.575373370e3, 0.101077577e4]},
-               b={'p': [5, 5, 25], 'h': [3500, 4000, 3500], 'T': [0.801299102e3, 0.101531583e4, 0.875279054e3]},
-               c={'p': [40, 60, 60], 'h': [2700, 2700, 3200], 'T': [0.743056411e3, 0.791137067e3, 0.882756860e3]})
-r = Region2()
-print(r.p_Th(T=regions['a']['T'][0], h=regions['a']['h'][0]))
-
-# TODO: Probably remove all the if state in self checks in backwards calls to allow fsolve to work. On instantiation, perform calculations and check if state is in self. Raise exeption if it isn't and recommend a class.
+        raise NotImplementedError('Solving T_ps(x, s) - T == 0 proved to be almost impossible for some reason. This might get implemented in a future revision.')
+        # TODO: Fix this somehow.
+        # def f(p):
+        #     return self.T_ps(p, s) - T
+        #
+        # if 273.15 <= T <= 623.15:
+        #     a, b = 0, _p_s(T=T)
+        # elif 623.15 <= T <= 863.15:
+        #     a, b = 0, Region2.p_b23(T=T)
+        # else:
+        #     a, b = 0, 100
+        #
+        # x = np.linspace(a, b, 150)
+        # y = np.array([f(p) for p in x])
+        # a = x[np.argmax(y < 0)]
+        #
+        # p = bisect(f, a, b)  # initial p guess from region boundaries (see __contains__).
+        #
+        # if not State(p=p, T=T) in self:
+        #     # TODO: Suggest a region,
+        #     warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        # return p

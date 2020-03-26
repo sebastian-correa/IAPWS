@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from typing import Optional
 from collections import defaultdict
@@ -425,10 +427,10 @@ class Region1(Region):
         """
         eta = h/2500
         T = sum(entry['n'] * p**entry['I']*(eta + 1)**entry['J'] for entry in Region1.table6.values())
-        if State(p=p, T=T) in self:
-            return T
-        else:
-            raise ValueError(f'State out of bounds. {T}')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return T
 
     def T_ps(self, p: float, s: float) -> float:
         """
@@ -440,11 +442,10 @@ class Region1(Region):
             Temperature (K).
         """
         T = sum(entry['n'] * p**entry['I'] * (s + 2)**entry['J'] for entry in Region1.table8.values())
-        if State(p=p, T=T) in self:
-            return T
-        else:
-            #TODO: Suggest a region.
-            raise ValueError(f'State out of bounds. {T}')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return T
 
     def T_hs(self, h: float, s: float) -> float:
         """
@@ -476,10 +477,10 @@ class Region1(Region):
 
         p = 100 * sum(entry['n'] * (eta + 0.05)**entry['I'] * (sigma + 0.05)**entry['J'] for entry in Region1.table2_supp.values())
         T = self.T_ps(p, s)
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds.')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return p
 
     def p_Th(self, T: float, h: float) -> float:
         """
@@ -498,10 +499,10 @@ class Region1(Region):
         p0 = np.array([(_p_s(T=T) + 100) / 2])
         p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
 
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds.')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return p
 
     def p_Ts(self, T: float, s: float) -> float:
         """
@@ -520,7 +521,7 @@ class Region1(Region):
         p0 = (_p_s(T=T) + 100) / 2
         p = fsolve(f, p0)[0]  # initial p guess from region boundaries (see __contains__).
 
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds.')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return p
