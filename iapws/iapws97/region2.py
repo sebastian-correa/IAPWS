@@ -489,9 +489,10 @@ class Region2(Region):
             self._state.p = self.p_Th(T=T, h=h)
             self._state.h = h
         elif T and s:
-            self._state.T = T
-            self._state.p = self.p_Ts(T=T, s=s)
-            self._state.s = s
+            raise NotImplementedError('Instantiating in Region2 with a (T, s) pair is not yet implemented. See Region2.p_Ts.')
+            # self._state.T = T
+            # self._state.p = self.p_Ts(T=T, s=s)
+            # self._state.s = sk
         elif h and s:
             self._state.p = self.p_hs(h, s)
             self._state.T = self.T_ph(p, h)
@@ -1123,8 +1124,8 @@ class Region2(Region):
             p0 = (611.213e-6 + Region2.p_b23(T=T)) / 2
         else:
             p0 = 50.
-
-        p = newton(f, p0)  # initial p guess from region boundaries (see __contains__).
+        with warnings.catch_warnings():
+            p = newton(f, p0)  # initial p guess from region boundaries (see __contains__).
 
         if not State(p=p, T=T) in self:
             # TODO: Suggest a region,

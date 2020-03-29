@@ -5,6 +5,9 @@ from iapws.iapws97.region3 import Region3
 from iapws.iapws97._utils import b23, _p_s, State
 import numpy as np
 
+# TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
+# Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
+
 class GeneralTests(unittest.TestCase):
     
     def test_b23_eq_5(self):
@@ -201,8 +204,6 @@ class TestRegion2(unittest.TestCase):
             ts = vals['T']
 
             for p, h, T in zip(ps, hs, ts):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 T_calc = Region2().T_ph(p=p, h=h)
                 self.assertAlmostEqual(T, T_calc, places=4)
 
@@ -217,8 +218,6 @@ class TestRegion2(unittest.TestCase):
             ts = vals['T']
 
             for p, s, T in zip(ps, ss, ts):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 T_calc = Region2().T_ps(p=p, s=s)
                 self.assertAlmostEqual(T, T_calc, places=4)
 
@@ -234,8 +233,6 @@ class TestRegion2(unittest.TestCase):
             ts = vals['T']
 
             for p, h, T in zip(ps, hs, ts):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 p_calc = Region2().p_Th(T=T, h=h)
                 self.assertAlmostEqual(p, p_calc, places=4)
 
@@ -251,7 +248,7 @@ class TestRegion2(unittest.TestCase):
             ts = vals['T']
 
             for p, s, T in zip(ps, ss, ts):
-                self.assertRaises(r.p_Ts(T=T, s=s), NotImplementedError)
+                self.assertRaises(NotImplementedError, r.p_Ts, T=T, s=s)
                 # p_calc = r.p_Ts(T=T, s=s)
                 # self.assertAlmostEqual(p, p_calc, places=4)
 
@@ -267,8 +264,6 @@ class TestRegion2(unittest.TestCase):
             hs = vals['h']
 
             for p, h, s in zip(ps, hs, ss):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 p_calc = Region2().p_hs(h=h, s=s)
                 self.assertAlmostEqual(p, p_calc, places=4)
 
@@ -361,8 +356,6 @@ class TestRegion3(unittest.TestCase):
             ts = vals['T']
 
             for p, h, T in zip(ps, hs, ts):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 T_calc = Region3().T_ph(p=p, h=h)
                 self.assertAlmostEqual(T, T_calc, places=4)
 
@@ -377,8 +370,6 @@ class TestRegion3(unittest.TestCase):
             vs = vals['v']
 
             for p, h, v in zip(ps, hs, vs):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 v_calc = Region3().v_ph(p=p, h=h)
                 self.assertAlmostEqual(v, v_calc, places=4)
 
@@ -393,8 +384,6 @@ class TestRegion3(unittest.TestCase):
             ts = vals['T']
 
             for p, s, T in zip(ps, ss, ts):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 T_calc = Region3().T_ps(p=p, s=s)
                 self.assertAlmostEqual(T, T_calc, places=4)
 
@@ -409,17 +398,13 @@ class TestRegion3(unittest.TestCase):
             vs = vals['v']
 
             for p, s, v in zip(ps, ss, vs):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
                 v_calc = Region3().v_ps(p=p, s=s)
                 self.assertAlmostEqual(v, v_calc, places=4)
     
     def test_backwards_p_hs(self):
-        assert 1 == 2
-        # From table 9 of supplement for p(h,s).
-        regions = {'a': {'h': [2800, 2800, 4100], 's': [6.5, 9.5, 9.5], 'p': [1.371012767, 1.879743844e-3, 1.024788997e-1]},
-                   'b': {'h': [2800, 3600, 3600], 's': [6, 6, 7], 'p': [4.793911442, 8.395519209e1, 7.527161441]},
-                   'c': {'h': [2800, 2800, 3400], 's': [5.1, 5.8, 5.8], 'p': [9.439202060e1, 8.414574124, 8.376903879e1]}}
+        # From table 5 of supplement for p(h,s) [2].
+        regions = {'a': {'h': [1700, 2000, 2100], 's': [3.8, 4.2, 4.3], 'p': [2.555703246e1, 4.540873468e1, 6.078123340e1]},
+                   'b': {'h': [2600, 2400, 2700], 's': [5.1, 4.7, 5.0], 'p': [3.434999263e1, 6.363924887e1, 8.839043281e1]}}
         
         for reg, vals in regions.items():
             ss = vals['s']
@@ -427,9 +412,7 @@ class TestRegion3(unittest.TestCase):
             hs = vals['h']
 
             for p, h, s in zip(ps, hs, ss):
-                # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
-                # Due to how Python shows numbers, the best way to get that amount is X = abs(Decimal(string_value).as_tuple().exponent)
-                p_calc = Region2().p_hs(h=h, s=s)
+                p_calc = Region3().p_hs(h=h, s=s)
                 self.assertAlmostEqual(p, p_calc, places=4)
 
     def test_property_accuracy(self):

@@ -85,7 +85,6 @@ def region(p: float, T: float) -> int:
 
 @dataclass
 class State(object):
-    # TODO: Add rho.
     T: float = None
     p: float = None
     v: float = None

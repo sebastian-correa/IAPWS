@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from typing import Optional, Dict
 from collections import defaultdict
@@ -325,6 +327,76 @@ class Region3(Region):
                     30: {'I': 1, 'J': 2, 'n': 0.146407900162154e2},
                     31: {'I': 2, 'J': 2, 'n': -0.327477787188230e1}}
 
+    table3_supp_ref2 = {0: {'I': 0, 'J': 0, 'n': 7.70889828326934},
+                        1: {'I': 0, 'J': 1, 'n': -26.0835009128688},
+                        2: {'I': 0, 'J': 5, 'n': 267.416218930389},
+                        3: {'I': 1, 'J': 0, 'n': 17.2221089496844},
+                        4: {'I': 1, 'J': 3, 'n': -293.54233214597},
+                        5: {'I': 1, 'J': 4, 'n': 614.135601882478},
+                        6: {'I': 1, 'J': 8, 'n': -61056.2757725674},
+                        7: {'I': 1, 'J': 14, 'n': -65127225.1118219},
+                        8: {'I': 2, 'J': 6, 'n': 73591.9313521937},
+                        9: {'I': 2, 'J': 16, 'n': -11664650591.4191},
+                        10: {'I': 3, 'J': 0, 'n': 35.5267086434461},
+                        11: {'I': 3, 'J': 2, 'n': -596.144543825955},
+                        12: {'I': 3, 'J': 3, 'n': -475.842430145708},
+                        13: {'I': 4, 'J': 0, 'n': 69.6781965359503},
+                        14: {'I': 4, 'J': 1, 'n': 335.674250377312},
+                        15: {'I': 4, 'J': 4, 'n': 25052.6809130882},
+                        16: {'I': 4, 'J': 5, 'n': 146997.380630766},
+                        17: {'I': 5, 'J': 28, 'n': 5.38069315091534e+19},
+                        18: {'I': 6, 'J': 28, 'n': 1.43619827291346e+21},
+                        19: {'I': 7, 'J': 24, 'n': 3.64985866165994e+19},
+                        20: {'I': 8, 'J': 1, 'n': -2547.41561156775},
+                        21: {'I': 10, 'J': 32, 'n': 2.40120197096563e+27},
+                        22: {'I': 10, 'J': 36, 'n': -3.93847464679496e+29},
+                        23: {'I': 14, 'J': 22, 'n': 1.47073407024852e+24},
+                        24: {'I': 18, 'J': 28, 'n': -4.26391250432059e+31},
+                        25: {'I': 20, 'J': 36, 'n': 1.94509340621077e+38},
+                        26: {'I': 22, 'J': 16, 'n': 6.66212132114896e+23},
+                        27: {'I': 22, 'J': 28, 'n': 7.06777016552858e+33},
+                        28: {'I': 24, 'J': 36, 'n': 1.75563621975576e+41},
+                        29: {'I': 28, 'J': 16, 'n': 1.08408607429124e+28},
+                        30: {'I': 28, 'J': 36, 'n': 7.30872705175151e+43},
+                        31: {'I': 32, 'J': 10, 'n': 1.5914584739887e+24},
+                        32: {'I': 32, 'J': 28, 'n': 3.77121605943324e+40}}
+
+    table4_supp_ref2 = {0: {'I': -12, 'J': 2, 'n': 1.25244360717979e-13},
+                        1: {'I': -12, 'J': 10, 'n': -0.0126599322553713},
+                        2: {'I': -12, 'J': 12, 'n': 5.06878030140626},
+                        3: {'I': -12, 'J': 14, 'n': 31.7847171154202},
+                        4: {'I': -12, 'J': 20, 'n': -391041.161399932},
+                        5: {'I': -10, 'J': 2, 'n': -9.75733406392044e-11},
+                        6: {'I': -10, 'J': 10, 'n': -18.6312419488279},
+                        7: {'I': -10, 'J': 14, 'n': 510.973543414101},
+                        8: {'I': -10, 'J': 18, 'n': 373847.005822362},
+                        9: {'I': -8, 'J': 2, 'n': 2.99804024666572e-08},
+                        10: {'I': -8, 'J': 8, 'n': 20.0544393820342},
+                        11: {'I': -6, 'J': 2, 'n': -4.98030487662829e-06},
+                        12: {'I': -6, 'J': 6, 'n': -10.230180636003},
+                        13: {'I': -6, 'J': 7, 'n': 55.2819126990325},
+                        14: {'I': -6, 'J': 8, 'n': -206.211367510878},
+                        15: {'I': -5, 'J': 10, 'n': -7940.12232324823},
+                        16: {'I': -4, 'J': 4, 'n': 7.82248472028153},
+                        17: {'I': -4, 'J': 5, 'n': -58.6544326902468},
+                        18: {'I': -4, 'J': 8, 'n': 3550.73647696481},
+                        19: {'I': -3, 'J': 1, 'n': -0.000115303107290162},
+                        20: {'I': -3, 'J': 3, 'n': -1.75092403171802},
+                        21: {'I': -3, 'J': 5, 'n': 257.98168774816},
+                        22: {'I': -3, 'J': 6, 'n': -727.048374179467},
+                        23: {'I': -2, 'J': 0, 'n': 0.000121644822609198},
+                        24: {'I': -2, 'J': 1, 'n': 0.0393137871762692},
+                        25: {'I': -1, 'J': 0, 'n': 0.00704181005909296},
+                        26: {'I': 0, 'J': 3, 'n': -82.910820069811},
+                        27: {'I': 2, 'J': 0, 'n': -0.26517881813125},
+                        28: {'I': 2, 'J': 1, 'n': 13.7531682453991},
+                        29: {'I': 5, 'J': 0, 'n': -52.2394090753046},
+                        30: {'I': 6, 'J': 1, 'n': 2405.56298941048},
+                        31: {'I': 8, 'J': 1, 'n': -22736.1631268929},
+                        32: {'I': 10, 'J': 1, 'n': 89074.6343932567},
+                        33: {'I': 14, 'J': 3, 'n': -23923456.5822486},
+                        34: {'I': 14, 'J': 7, 'n': 5687958081.29714}}
+
     def __init__(self, T: Optional[float] = None, rho: Optional[float] = None, h: Optional[float] = None,
                  s: Optional[float] = None, p: Optional[float] = None, state: Optional[State] = None):
         """
@@ -450,7 +522,7 @@ class Region3(Region):
     @staticmethod
     def h_3ab(p: float) -> float:
         """
-        Used to determine wheter to use region 3a or 3b. Eq.1 from supplementary release.
+        Used to determine whether to use region 3a or 3b. Eq.1 from supplementary release.
         Args:
             p: Pressure (MPa)
         Returns:
@@ -774,6 +846,7 @@ class Region3(Region):
         Returns:
             Temperature (K).
         """
+        raise NotImplementedError()
 
     def v_ps(self, p: float, s: float) -> float:
         """
@@ -850,29 +923,19 @@ class Region3(Region):
         """
         reg = self.subregion(h=h, s=s)
         if reg == 'a':
-            sigma = s / 12
-            eta = h / 4200
-            _pi = sum(entry['n'] * (eta - 0.5) ** entry['I'] * (sigma - 1.2) ** entry['J'] for entry in
-                      Region2.table6_supp.values()) ** 4
-            p = 4 * _pi
-        elif reg == 'b':
-            sigma = s / 7.9
-            eta = h / 4100
-            _pi = sum(entry['n'] * (eta - 0.6) ** entry['I'] * (sigma - 1.01) ** entry['J'] for entry in
-                      Region2.table7_supp.values()) ** 4
-            p = 100 * _pi
-        elif reg == 'c':
-            sigma = s / 5.9
-            eta = h / 3500
-            _pi = sum(entry['n'] * (eta - 0.7) ** entry['I'] * (sigma - 1.1) ** entry['J'] for entry in
-                      Region2.table8_supp.values()) ** 4
-            p = 100 * _pi
+            eta = h / 2300
+            sigma = s / 4.4
+            p = 99 * sum(entry['n'] * (eta - 1.01)**entry['I'] * (sigma - 0.750)**entry['J'] for entry in Region3.table3_supp_ref2.values())
+        else:
+            eta = h / 2800
+            sigma = s / 5.3
+            p = 16.6 / sum(entry['n'] * (eta - 0.681) ** entry['I'] * (sigma - 0.792) ** entry['J'] for entry in Region3.table4_supp_ref2.values())
 
         T = self.T_ph(p=p, h=h)
-        if State(p=p, T=T) in self:
-            return p
-        else:
-            raise ValueError(f'State out of bounds. {p},{T}')
+        if not State(p=p, T=T) in self:
+            # TODO: Suggest a region,
+            warnings.warn(f'State out of bounds. {T}', RuntimeWarning)
+        return p
 
     def T_hs(self, h: float, s: float) -> float:
         """
@@ -887,3 +950,17 @@ class Region3(Region):
         """
         p = self.p_hs(h, s)
         return self.T_ph(p, h)
+
+    def v_hs(self, h: float, s: float) -> float:
+        """
+        Backwards equation for calculating specific volume as a function of enthalpy and entropy.
+        Args:
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
+        Returns:
+            Specific Volume (m^3/kg).
+        References:
+            [2]
+        """
+        p = self.p_hs(h, s)
+        return self.v_ps(p, s)
