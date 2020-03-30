@@ -415,6 +415,21 @@ class TestRegion3(unittest.TestCase):
                 p_calc = Region3().p_hs(h=h, s=s)
                 self.assertAlmostEqual(p, p_calc, places=4)
 
+    def test_v_pt_temp_eqns_boundaries(self):
+        r = Region3()
+        regs = {'ab': {'P': 40, 'T': 6.930341408e2},
+                'cd': {'P': 25, 'T': 6.493659208e2},
+                'ef': {'P': 40, 'T': 7.139593992e2},
+                'gh': {'P': 23, 'T': 6.498873759e2},
+                'ij': {'P': 23, 'T': 6.515778091e2},
+                'jk': {'P': 23, 'T': 6.558338344e2},
+                'mn': {'P': 22.8, 'T': 6.496054133e2},
+                'op': {'P': 22.8, 'T': 6.500106947e2},
+                'qu': {'P': 22, 'T': 6.456355027e2},
+                'rx': {'P': 22, 'T': 6.482622754e2}}
+        for regs, data in regs.items():
+            self.assertAlmostEqual(r._T_xx(data['P'], regs), data['T'], places=5)
+
     def test_property_accuracy(self):
         assert 1 == 2
         """Test the results from Table 15."""

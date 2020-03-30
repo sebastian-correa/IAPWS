@@ -406,17 +406,17 @@ class Region3(Region):
                                2: {'I': 1, 'n': 4281.43584791546},
                                3: {'I': 2, 'n': -269.02917314013},
                                4: {'I': 3, 'n': 7.51608051114157},
-                               {'I': 4, 'n': -0.0787105249910383}},
+                               5: {'I': 4, 'n': -0.0787105249910383}},
                         'ij': {1: {'I': 0, 'n': 584.814781649163},
                                2: {'I': 1, 'n': -0.616179320924617},
                                3: {'I': 2, 'n': 0.260763050899562},
                                4: {'I': 3, 'n': -0.00587071076864459},
-                               {'I': 4, 'n': 5.15308185433082e-05}},
+                               5: {'I': 4, 'n': 5.15308185433082e-5}},
                         'jk': {1: {'I': 0, 'n': 617.229772068439},
                                2: {'I': 1, 'n': -7.70600270141675},
                                3: {'I': 2, 'n': 0.697072596851896},
                                4: {'I': 3, 'n': -0.0157391839848015},
-                               {'I': 4, 'n': 0.000137897492684194}},
+                               5: {'I': 4, 'n': 0.000137897492684194}},
                         'mn': {1: {'I': 0, 'n': 535.339483742384},
                                2: {'I': 1, 'n': 7.61978122720128},
                                3: {'I': 2, 'n': -0.158365725441648},
@@ -837,16 +837,16 @@ class Region3(Region):
         """
         xy = xy.lower()
         yx = xy[::-1]
-        xy_subr = xy in Region3.table1_supp_ref3 or xy in Region3.table9_supp_ref3
-        yx_subr = yx in Region3.table1_supp_ref3 or yx in Region3.table9_supp_ref3
+        xy_subr = xy in Region3.table1_supp_ref3 or xy in Region3.table9_supp_ref3 or xy == 'ef'
+        yx_subr = yx in Region3.table1_supp_ref3 or yx in Region3.table9_supp_ref3 or yx == 'ef'
         if xy_subr:
             pass
         elif yx_subr:
             xy = yx
-        else
+        else:
             raise ValueError(f'Specified subregion is invalid. {xy} given and you can only chose from: {list({**Region3.table1_supp_ref3, **Region3.table9_supp_ref3}.keys())}')
 
-        if xy in 'cd gh ij jk mn qu rx uv'.split(' '):
+        if xy in 'cd gh ij jk mn qu rx'.split(' '):
             return sum(entry['n'] * p**entry['I'] for entry in Region3.table1_supp_ref3[xy].values())
         elif xy in 'ab op'.split(' '):
             return sum(entry['n'] * np.log(p)**entry['I'] for entry in Region3.table1_supp_ref3[xy].values())
