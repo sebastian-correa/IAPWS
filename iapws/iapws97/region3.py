@@ -16,6 +16,7 @@ class Region3(Region):
 
     Class attributes:
 
+    # TODO:
     """
     b23_const = {1: 0.348_051_856_289_69e3,
                  2: -0.116_718_598_799_75e1,
@@ -397,6 +398,57 @@ class Region3(Region):
                         33: {'I': 14, 'J': 3, 'n': -23923456.5822486},
                         34: {'I': 14, 'J': 7, 'n': 5687958081.29714}}
 
+    table1_supp_ref3 = {'cd': {1: {'I': 0, 'n': 585.276966696349},
+                               2: {'I': 1, 'n': 2.78233532206915},
+                               3: {'I': 2, 'n': -0.0127283549295878},
+                               4: {'I': 3, 'n': 0.000159090746562729}},
+                        'gh': {1: {'I': 0, 'n': -24928.4240900418},
+                               2: {'I': 1, 'n': 4281.43584791546},
+                               3: {'I': 2, 'n': -269.02917314013},
+                               4: {'I': 3, 'n': 7.51608051114157},
+                               {'I': 4, 'n': -0.0787105249910383}},
+                        'ij': {1: {'I': 0, 'n': 584.814781649163},
+                               2: {'I': 1, 'n': -0.616179320924617},
+                               3: {'I': 2, 'n': 0.260763050899562},
+                               4: {'I': 3, 'n': -0.00587071076864459},
+                               {'I': 4, 'n': 5.15308185433082e-05}},
+                        'jk': {1: {'I': 0, 'n': 617.229772068439},
+                               2: {'I': 1, 'n': -7.70600270141675},
+                               3: {'I': 2, 'n': 0.697072596851896},
+                               4: {'I': 3, 'n': -0.0157391839848015},
+                               {'I': 4, 'n': 0.000137897492684194}},
+                        'mn': {1: {'I': 0, 'n': 535.339483742384},
+                               2: {'I': 1, 'n': 7.61978122720128},
+                               3: {'I': 2, 'n': -0.158365725441648},
+                               4: {'I': 3, 'n': 0.00192871054508108}},
+                        'qu': {1: {'I': 0, 'n': 565.603648239126},
+                               2: {'I': 1, 'n': 5.29062258221222},
+                               3: {'I': 2, 'n': -0.102020639611016},
+                               4: {'I': 3, 'n': 0.00122240301070145}},
+                        'rx': {1: {'I': 0, 'n': 584.561202520006},
+                               2: {'I': 1, 'n': -1.02961025163669},
+                               3: {'I': 2, 'n': 0.243293362700452},
+                               4: {'I': 3, 'n': -0.00294905044740799}},
+                        'ab': {1: {'I': 0, 'n': 0.154793642129415e4},
+                               2: {'I': 1, 'n': -0.187661219490113e3},
+                               3: {'I': 2, 'n': 0.213144632222113e2},
+                               4: {'I': -1, 'n': -0.191887498864292e4},
+                               5: {'I': -2, 'n': 0.918419702359447e3}},
+                        'op': {1: {'I': 0, 'n': 0.969461372400213e3},
+                               2: {'I': 1, 'n': -0.332500170441278e3},
+                               3: {'I': 2, 'n': 0.642859598466067e2},
+                               4: {'I': -1, 'n': 0.773845935768222e3},
+                               5: {'I': -2, 'n': -0.152313732937084e4}}}
+    table9_supp_ref3 = {'uv': {1: {'I': 0, 'n': 528.199646263062},
+                               2: {'I': 1, 'n': 8.90579602135307},
+                               3: {'I': 2, 'n': -0.222814134903755},
+                               4: {'I': 3, 'n': 0.00286791682263697}},
+                        'wx': {1: {'I': 0, 'n': 0.728052609145380e1},
+                               2: {'I': 1, 'n': 0.973505869861952e2},
+                               3: {'I': 2, 'n': 0.147370491183191e2},
+                               4: {'I': -1, 'n': 0.329196213998375e3},
+                               5: {'I': -2, 'n': 0.873371668682417e3}}}
+
     def __init__(self, T: Optional[float] = None, rho: Optional[float] = None, h: Optional[float] = None,
                  s: Optional[float] = None, p: Optional[float] = None, state: Optional[State] = None):
         """
@@ -770,6 +822,206 @@ class Region3(Region):
         return self._state.w
 
     #############################################################
+    ####################### v(p,T) aux ##########################
+    #############################################################
+    @staticmethod
+    def _T_xx(p: float, xy: str) -> float:
+        """
+        Temperature in the boundary betwen subregions x and y.
+        Args:
+            p: Pressure (MPa).
+            xy: Subregions between which we are looking for the boundary. Can be upper or lower case and xy or yx.
+
+        Returns:
+            Value of temperature in the boundary betwen subregions x and y.
+        """
+        xy = xy.lower()
+        yx = xy[::-1]
+        xy_subr = xy in Region3.table1_supp_ref3 or xy in Region3.table9_supp_ref3
+        yx_subr = yx in Region3.table1_supp_ref3 or yx in Region3.table9_supp_ref3
+        if xy_subr:
+            pass
+        elif yx_subr:
+            xy = yx
+        else
+            raise ValueError(f'Specified subregion is invalid. {xy} given and you can only chose from: {list({**Region3.table1_supp_ref3, **Region3.table9_supp_ref3}.keys())}')
+
+        if xy in 'cd gh ij jk mn qu rx uv'.split(' '):
+            return sum(entry['n'] * p**entry['I'] for entry in Region3.table1_supp_ref3[xy].values())
+        elif xy in 'ab op'.split(' '):
+            return sum(entry['n'] * np.log(p)**entry['I'] for entry in Region3.table1_supp_ref3[xy].values())
+        elif xy == 'ef':
+            return 3.727888004 * (p - 22.064) + 647.096
+
+    @staticmethod
+    def subregion_for_v_pt(p: float, T: float) -> str:
+        """
+        Returns a subregion code for a given pressure and Temperature.
+        Args:
+            p: Pressure (MPa).
+            T: Temperature (K).
+
+        Returns:
+            Subregion code.
+        """
+        if 40 < p <= 100:
+            if T <= Region3._T_xx(p, 'ab'):
+                return 'a'
+            else:
+                return 'b'
+        elif 25 < p <= 40:
+            t_cd = Region3._T_xx(p, 'cd')
+            t_ab = Region3._T_xx(p, 'ab')
+            t_ef = Region3._T_xx(p, 'ef')
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_ab:
+                return 'd'
+            elif t_ab < T <= t_ef:
+                return 'e'
+            else:
+                return 'f'
+        elif 23.5 < p <= 25:
+            t_cd = Region3._T_xx(p, 'cd')
+            t_gh = Region3._T_xx(p, 'gh')
+            t_ef = Region3._T_xx(p, 'ef')
+            t_ij = Region3._T_xx(p, 'ij')
+            t_jk = Region3._T_xx(p, 'jk')
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_gh:
+                return 'g'
+            elif t_gh < T <= t_ef:
+                return 'h'
+            elif t_ef < T <= t_ij:
+                return 'i'
+            elif t_ij < T <= t_jk:
+                return 'j'
+            else:
+                return 'k'
+        elif 23 < p <= 23.5:
+            t_cd = Region3._T_xx(p, 'cd')
+            t_gh = Region3._T_xx(p, 'gh')
+            t_ef = Region3._T_xx(p, 'ef')
+            t_ij = Region3._T_xx(p, 'ij')
+            t_jk = Region3._T_xx(p, 'jk')
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_gh:
+                return 'l'
+            elif t_gh < T <= t_ef:
+                return 'h'
+            elif t_ef < T <= t_ij:
+                return 'i'
+            elif t_ij < T <= t_jk:
+                return 'j'
+            else:
+                return 'k'
+        elif 22.5 < p <= 23:
+            t_cd = Region3._T_xx(p, 'cd')
+            t_gh = Region3._T_xx(p, 'gh')
+            t_mn = Region3._T_xx(p, 'mn')
+            t_ef = Region3._T_xx(p, 'ef')
+            t_op = Region3._T_xx(p, 'op')
+            t_ij = Region3._T_xx(p, 'ij')
+            t_jk = Region3._T_xx(p, 'jk')
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_gh:
+                return 'l'
+            elif t_gh < T <= t_mn:
+                return 'm'
+            elif t_mn < T <= t_ef:
+                return 'n'
+            elif t_ef < T <= t_op:
+                return 'o'
+            elif t_op < T <= t_ij:
+                return 'p'
+            elif t_ij < T <= t_jk:
+                return 'j'
+            else:
+                return 'k'
+        elif Region3.p_b23(643.15) < p <= 22.5:
+            t_cd = Region3._T_xx(p, 'cd')
+            t_qu = Region3._T_xx(p, 'qu')
+            t_rx = Region3._T_xx(p, 'rx')
+            t_jk = Region3._T_xx(p, 'jk')
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_qu:
+                return 'q'
+            elif t_rx < T <= t_jk:
+                return 'r'
+            # elif t_qu < T <= t_rx:
+            #     # Table 10
+            #     tef = _tef_p(p)
+            #     twx = _twx_p(p)
+            #     tuv = Region3._T_xx(p, 'uv')
+            #     if 22.11 < p <= 22.5:
+            #         if T <= tuv:
+            #             return 'u'
+            #         elif tuv <= T <= tef:
+            #             return 'v'
+            #         elif tef <= T <= twx:
+            #             return 'w'
+            #         else:
+            #             return 'x'
+            #     elif 22.064 < p <= 22.11:
+            #         if T <= tuv:
+            #             return 'u'
+            #         elif tuv <= T <= tef:
+            #             return 'y'
+            #         elif tef <= T <= twx:
+            #             return 'z'
+            #         else:
+            #             return 'x'
+            #     elif T > _TSat_p(p):
+            #         if _pSat_T(643.15) < p <= 21.90096265:
+            #             return 'x'
+            #         elif 21.90096265 < p <= 22.064:
+            #             if T <= twx:
+            #                 return 'z'
+            #             else:
+            #                 return 'x'
+            #     elif T <= _TSat_p(p):
+            #         if _pSat_T(643.15) < p <= 21.93161551:
+            #             return 'u'
+            #         elif 21.93161551 < p <= 22.064:
+            #             if T <= tuv:
+            #                 return 'u'
+            #             else:
+            #                 return 'y'
+            else:
+                return 'k'
+        elif 20.5 < p <= Region3.p_b23(643.15):
+            t_cd = Region3._T_xx(p, 'cd')
+            t_sat = Region3.T_b23(p)
+            t_jk = Region3._T_xx(p, 'jk')
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_sat:
+                return 's'
+            elif t_sat < T <= t_jk:
+                return 'r'
+            else:
+                return 'k'
+        elif 1.900_881_189_173_929e1 < p <= 20.5:
+            t_cd = Region3._T_xx(p, 'cd')
+            t_sat = Region3.T_b23(p)
+            if T <= t_cd:
+                return 'c'
+            elif t_cd < T <= t_sat:
+                return 's'
+            else:
+                return 't'
+        elif Region3.p_b23(623.15) < p <= 1.900_881_189_173_929e1:
+            t_sat = Region3.T_b23(p)
+            if T <= t_sat:
+                return 'c'
+            else:
+                return 't'
+
+    #############################################################
     ####################### Backwards ###########################
     #############################################################
     def v_ph(self, p: float, h: float) -> float:
@@ -845,6 +1097,8 @@ class Region3(Region):
             h: Enthalpy (kJ/kg).
         Returns:
             Temperature (K).
+        References:
+            [3]
         """
         raise NotImplementedError()
 
