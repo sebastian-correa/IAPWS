@@ -426,7 +426,9 @@ class TestRegion3(unittest.TestCase):
                 'mn': {'P': 22.8, 'T': 6.496054133e2},
                 'op': {'P': 22.8, 'T': 6.500106947e2},
                 'qu': {'P': 22, 'T': 6.456355027e2},
-                'rx': {'P': 22, 'T': 6.482622754e2}}
+                'rx': {'P': 22, 'T': 6.482622754e2},
+                'uv': {'P': 22.3, 'T': 6.477996121e2},
+                'wx': {'P': 22.3, 'T': 6.482049480e2}}
         for regs, data in regs.items():
             self.assertAlmostEqual(r._T_xx(data['P'], regs), data['T'], places=5)
 
