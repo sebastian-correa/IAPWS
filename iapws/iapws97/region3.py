@@ -1306,7 +1306,7 @@ class Region3(Region):
                                  21: {'I': 8, 'J': -8, 'n': -0.000248488015614543},
                                  22: {'I': 8, 'J': -4, 'n': 3945360.49497068}}}
 
-    table4_supp_ref3 = {
+    table4_and_12_supp_ref3 = {
         'a': [0.0024, 100, 760, 0.085, 0.817, 1, 1, 1],
         'b': [0.0041, 100, 860, 0.280, 0.779, 1, 1, 1],
         'c': [0.0022, 40, 690, 0.259, 0.903, 1, 1, 1],
@@ -1326,15 +1326,14 @@ class Region3(Region):
         'q': [0.0022, 23, 650, 0.848, 0.983, 1, 1, 4],
         'r': [0.0054, 23, 650, 0.874, 0.982, 1, 1, 1],
         's': [0.0022, 21, 640, 0.886, 0.990, 1, 1, 4],
-        't': [0.0088, 20, 650, 0.803, 1.020, 1, 1, 1]
+        't': [0.0088, 20, 650, 0.803, 1.020, 1, 1, 1],
+        'u': [0.0026, 23, 650, 0.902, 0.988, 1, 1, 1],
+        'v': [0.0031, 23, 650, 0.960, 0.995, 1, 1, 1],
+        'w': [0.0039, 23, 650, 0.959, 0.995, 1, 1, 4],
+        'x': [0.0049, 23, 650, 0.910, 0.988, 1, 1, 1],
+        'y': [0.0031, 22, 650, 0.996, 0.994, 1, 1, 4],
+        'z': [0.0038, 22, 650, 0.993, 0.994, 1, 1, 4]
     }
-
-    table12_supp_ref3 = {"u": [0.0026, 23, 650, 0.902, 0.988, 1, 1, 1],
-                         "v": [0.0031, 23, 650, 0.960, 0.995, 1, 1, 1],
-                         "w": [0.0039, 23, 650, 0.959, 0.995, 1, 1, 4],
-                         "x": [0.0049, 23, 650, 0.910, 0.988, 1, 1, 1],
-                         "y": [0.0031, 22, 650, 0.996, 0.994, 1, 1, 4],
-                         "z": [0.0038, 22, 650, 0.993, 0.994, 1, 1, 4]}
 
     def __init__(self, T: Optional[float] = None, rho: Optional[float] = None, h: Optional[float] = None,
                  s: Optional[float] = None, p: Optional[float] = None, state: Optional[State] = None):
@@ -1922,12 +1921,13 @@ class Region3(Region):
             [3]
         """
         reg = Region3.subregion_for_v_pt(p, T)
-        v_aster, p_aster, t_aster, a, b, c, d, e = Region3.table4_supp_ref3[reg]
+        v_aster, p_aster, t_aster, a, b, c, d, e = Region3.table4_and_12_supp_ref3[reg]
         eqn_coefs = Region3.table_appendix_ref3[reg]
 
+        _pi = p / p_aster
+        theta = T / t_aster
+
         if reg != 'n':
-            _pi = p / p_aster
-            theta = T / t_aster
             return v_aster * sum(entry['n'] * (_pi - a)**(c * entry['I']) * (theta - b)**(d * entry['J']) for entry in eqn_coefs.values()) ** e
         else:
             return v_aster * np.exp(sum(entry['n'] * (_pi - a)**entry['I'] * (theta - b)**entry['J'] for entry in eqn_coefs.values()))
