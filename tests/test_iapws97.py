@@ -2,6 +2,7 @@ import unittest
 from iapws.iapws97.region1 import Region1
 from iapws.iapws97.region2 import Region2
 from iapws.iapws97.region3 import Region3
+from iapws.iapws97.region4 import Region4
 from iapws.iapws97._utils import b23, _p_s, State
 import numpy as np
 
@@ -419,7 +420,7 @@ class TestRegion3(unittest.TestCase):
         r = Region3()
         # Table 5 and 11 ref [3].
         assert  1==2
-        verif = {'a': {1: {'p': 50, 'T': 630}},
+        verif = {'a',
                  'b',
                  'c',
                  'd',
@@ -469,7 +470,53 @@ class TestRegion3(unittest.TestCase):
             p = [r.v, r.h, r.u, r.s, r.cp, r.w]
             np.testing.assert_almost_equal(properties, p, decimal=5)
 
+class TestRegion4(unittest.TestCase):
 
+    def test_range_validity(self):
+        s = State(T=300, p=3)
+        s1 = State(T=300, p=80)
+        s2 = State(T=500, p=3)
+
+        self.assertTrue(s in Region1())
+        self.assertTrue(s2 in Region1())
+        self.assertTrue(s2 in Region1())
+
+        s = State(T=300, p=3)
+        self.assertTrue(s in Region1())
+
+    def test_p_sat_t(self):
+        tees = [300, 500, 600]
+        pss = [0.353_658_941e-2, 0.263_889_776e1, 0.123_443_146e2]
+
+        for T, ps in zip(tees, pss):
+            self.assertAlmostEqual(Region4.p_sat(T=T), ps)
+
+    def test_t_sat_p(self):
+        tees = [0.372755919e3, 0.453035632e3, 0.584149488e3]
+        pss = [0.1, 1, 10]
+
+        for T, ps in zip(tees, pss):
+            self.assertAlmostEqual(Region4.T_sat(p=ps), T)
+
+    def test_property_accuracy(self):
+        """Test the results from Table 5."""
+        s = State(T=300, p=3)
+        s1 = State(T=300, p=80)
+        s2 = State(T=500, p=3)
+        states = [s, s1, s2]
+
+        table5 = np.array([[0.100215168e-2, 0.971180894e-3, 0.120241800e-2],
+                           [0.115331273e3, 0.184142828e3, 0.975542239e3],
+                           [0.112324818e3, 0.106448356e3, 0.971934985e3],
+                           [0.392294792, 0.368563852, 0.258041912e1],
+                           [0.417301218e1, 0.401008987e1, 0.465580682e1],
+                           [0.150773921e4, 0.163469054e4, 0.124071337e4]])
+        table5 = table5.T
+
+        for state, properties in zip(states, table5):
+            r = Region1(state=state)
+            p = [r.v, r.h, r.u, r.s, r.cp, r.w]
+            np.testing.assert_almost_equal(properties, p, decimal=5)
 
 if __name__ == '__main__':
     unittest.main()
