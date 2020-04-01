@@ -491,6 +491,13 @@ class TestRegion4(unittest.TestCase):
         for T, ps in zip(tees, pss):
             self.assertAlmostEqual(Region4.p_sat(T=T), ps)
 
+    def test_p_sat_h(self):
+        hs = [1700, 2000, 2400]
+        pss = [1.724175718e1, 2.193442957e1, 2.018090839e1]
+
+        for h, ps in zip(hs, pss):
+            self.assertAlmostEqual(Region4.p_sat(h=h), ps)
+
     def test_t_sat_p(self):
         tees = [0.372755919e3, 0.453035632e3, 0.584149488e3]
         pss = [0.1, 1, 10]

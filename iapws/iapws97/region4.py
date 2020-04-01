@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from typing import Optional
 from collections import defaultdict
-from scipy.optimize import fsolve, newton
+import math
 
 from ._utils import State, Region, R, _p_s
 
@@ -26,6 +26,21 @@ class Region4(Region):
                8: 0.405_113_405_420_57e6,
                9: -0.238_555_575_678_49,
                10: 0.650_175_348_447_98e3}
+
+    table17_supp_ref4 = {1: {'I': 0, 'J': 0, 'n': 0.600073641753024},
+                         2: {'I': 1, 'J': 1, 'n': -0.936203654849857e1},
+                         3: {'I': 1, 'J': 3, 'n': 0.246590798594147e2},
+                         4: {'I': 1, 'J': 4, 'n': -0.107014222858224e3},
+                         5: {'I': 1, 'J': 36, 'n': -0.915821315805768e14},
+                         6: {'I': 5, 'J': 3, 'n': -0.862332011700662e4},
+                         7: {'I': 7, 'J': 0, 'n': -0.235837344740032e2},
+                         8: {'I': 8, 'J': 24, 'n': 0.252304969384128e18},
+                         9: {'I': 14, 'J': 16, 'n': -0.389718771997719e19},
+                         10: {'I': 20, 'J': 16, 'n': -0.333775713645296e23},
+                         11: {'I': 22, 'J': 3, 'n': 0.356499469636328e11},
+                         12: {'I': 24, 'J': 18, 'n': -0.148547544720641e27},
+                         13: {'I': 28, 'J': 8, 'n': 0.330611514838798e19},
+                         14: {'I': 36, 'J': 24, 'n': 0.813641294467829e38}}
 
     def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
@@ -112,33 +127,41 @@ class Region4(Region):
         if not isinstance(other, State):
             return False
         else:
-            return False  # TODO: What?
+            return math.isclose(self.p_sat(T=T), other.p) and math.isclose(self.T_sat(p=p), other.T)
 
     def __repr__(self) -> str:
         return f'Region4(p={self.p}, T={self.T})'
 
     @staticmethod
-    def base_eqn(T: float) -> float:
+    def base_eqn(T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:
         """
-        Equation for saturation pressure as a function of temperature (equation 30).
+        Equation for saturation pressure as a function of temperature (equation 30), enthalpy (eqn.10 [4]) or entropy (eqn 11 [4]).
         Args:
-            T: Temperature in K.
+            T: Temperature (K).
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
         Returns:
-            The saturation pressure at the given temperature in MPa.
+            The saturation pressure at the given temperature/enthalpy/entropy in MPa.
         """
-        if not 273.15 <= T <= 647.096:
-            warnings.warn(f'T must be in the range [273.15, 647.096]. {T} given.', RuntimeWarning)
-        z = T + Region4.table34[9] / (T - Region4.table34[10])
-        A = z ** 2 + Region4.table34[1] * z + Region4.table34[2]
-        B = Region4.table34[3] * z ** 2 + Region4.table34[4] * z + Region4.table34[5]
-        C = Region4.table34[6] * z ** 2 + Region4.table34[7] * z + Region4.table34[8]
-        p = 2 * C / (-B + np.sqrt(B ** 2 - 4 * A * C))
-        return p ** 4
+        if T is not None and h is None and s is None:
+            if not 273.15 <= T <= 647.096:
+                warnings.warn(f'T must be in the range [273.15, 647.096]. {T} given.', RuntimeWarning)
+            z = T + Region4.table34[9] / (T - Region4.table34[10])
+            A = z ** 2 + Region4.table34[1] * z + Region4.table34[2]
+            B = Region4.table34[3] * z ** 2 + Region4.table34[4] * z + Region4.table34[5]
+            C = Region4.table34[6] * z ** 2 + Region4.table34[7] * z + Region4.table34[8]
+            p = 2 * C / (-B + np.sqrt(B ** 2 - 4 * A * C))
+            return p ** 4
+        elif h is not None and T is None and s is None:
+            eta = h / 2600
+            return 22 * sum(entry['n'] * (eta - 1.02)**entry['I'] * (eta - 0.608)**entry['J'] for entry in Region4.table17_supp_ref4.values())
+        elif s is not None and T is None and h is None:
+            pass
 
     @staticmethod
-    def p_sat(T: float) -> float:
+    def p_sat(T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:
         """Alias for `self.base_eqn`"""
-        return Region4.base_eqn(T)
+        return Region4.base_eqn(T, h, s)
 
     #############################################################
     ####################### Properties ##########################
