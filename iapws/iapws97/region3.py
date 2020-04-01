@@ -1750,7 +1750,45 @@ class Region3(Region):
         Returns:
             Subregion code.
         """
-        if 40 < p <= 100:
+        # Near critical point to be checked first so that we use best approximation:
+        if 22.11 < p <= 22.5:
+            t_qu = Region3._T_xx(p, 'qu')
+            t_uv = Region3._T_xx(p, 'uv')
+            t_ef = Region3._T_xx(p, 'ef')
+            t_wx = Region3._T_xx(p, 'wx')
+            t_rx = Region3._T_xx(p, 'rx')
+
+            if t_qu < T <= t_uv:
+                return 'u'
+            elif t_uv < T <= t_ef:
+                return 'v'
+            elif t_ef < T <= t_wx:
+                return 'w'
+            elif t_wx < T <= t_rx:
+                return 'x'
+        elif 22.064 < T <= 22.11:
+            t_qu = Region3._T_xx(p, 'qu')
+            t_uv = Region3._T_xx(p, 'uv')
+            t_ef = Region3._T_xx(p, 'ef')
+            t_wx = Region3._T_xx(p, 'wx')
+            t_rx = Region3._T_xx(p, 'rx')
+
+            if t_qu < T <= t_uv:
+                return 'u'
+            elif t_uv < T <= t_ef:
+                return 'y'
+            elif t_ef < T <= t_wx:
+                return 'w'
+            elif t_wx < T <= t_rx:
+                return 'x'
+
+        # T_sat and p_sat
+
+
+
+
+
+        elif 40 < p <= 100:
             if T <= Region3._T_xx(p, 'ab'):
                 return 'a'
             else:

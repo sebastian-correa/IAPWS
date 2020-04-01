@@ -417,18 +417,34 @@ class TestRegion3(unittest.TestCase):
 
     def test_v_pt_temp_eqns_boundaries(self):
         r = Region3()
-        regs = {'ab': {'P': 40, 'T': 6.930341408e2},
-                'cd': {'P': 25, 'T': 6.493659208e2},
-                'ef': {'P': 40, 'T': 7.139593992e2},
-                'gh': {'P': 23, 'T': 6.498873759e2},
-                'ij': {'P': 23, 'T': 6.515778091e2},
-                'jk': {'P': 23, 'T': 6.558338344e2},
-                'mn': {'P': 22.8, 'T': 6.496054133e2},
-                'op': {'P': 22.8, 'T': 6.500106947e2},
-                'qu': {'P': 22, 'T': 6.456355027e2},
-                'rx': {'P': 22, 'T': 6.482622754e2},
-                'uv': {'P': 22.3, 'T': 6.477996121e2},
-                'wx': {'P': 22.3, 'T': 6.482049480e2}}
+        # Table 5 and 11 ref [3].
+        assert  1==2
+        verif = {'a': {1: {'p': 50, 'T': 630}},
+                 'b',
+                 'c',
+                 'd',
+                 'e',
+                 'f',
+                 'g',
+                 'h',
+                 'i',
+                 'j',
+                 'k',
+                 'l',
+                 'm',
+                 'n',
+                 'o',
+                 'p',
+                 'q',
+                 'r',
+                 's',
+                 't',
+                 'u',
+                 'v',
+                 'w',
+                 'x',
+                 'y',
+                 'z'}
         for regs, data in regs.items():
             self.assertAlmostEqual(r._T_xx(data['P'], regs), data['T'], places=5)
 
