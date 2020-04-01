@@ -42,6 +42,18 @@ class Region4(Region):
                          13: {'I': 28, 'J': 8, 'n': 0.330611514838798e19},
                          14: {'I': 36, 'J': 24, 'n': 0.813641294467829e38}}
 
+    table19_supp_ref4 = {1: {'I': 0, 'J': 0, 'n': 0.639767553612785},
+                         2: {'I': 1, 'J': 1, 'n': -0.129727445396014e2},
+                         3: {'I': 1, 'J': 32, 'n': -0.224595125848403e16},
+                         4: {'I': 4, 'J': 7, 'n': 0.177466741801846e7},
+                         5: {'I': 12, 'J': 4, 'n': 0.717079349571538e10},
+                         6: {'I': 12, 'J': 14, 'n': -0.378829107169011e18},
+                         7: {'I': 16, 'J': 36, 'n': -0.955586736431328e35},
+                         8: {'I': 24, 'J': 10, 'n': 0.187269814676188e24},
+                         9: {'I': 28, 'J': 0, 'n': 0.119254746466473e12},
+                         10: {'I': 32, 'J': 18, 'n': 0.110649277244882e37}}
+
+
     def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region4` check can be performed easily.
@@ -156,7 +168,8 @@ class Region4(Region):
             eta = h / 2600
             return 22 * sum(entry['n'] * (eta - 1.02)**entry['I'] * (eta - 0.608)**entry['J'] for entry in Region4.table17_supp_ref4.values())
         elif s is not None and T is None and h is None:
-            pass
+            sigma = s / 5.2
+            return 22 * sum(entry['n'] * (sigma - 1.03)**entry['I'] * (sigma - 0.699)**entry['J'] for entry in Region4.table19_supp_ref4.values())
 
     @staticmethod
     def p_sat(T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:

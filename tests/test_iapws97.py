@@ -470,6 +470,7 @@ class TestRegion3(unittest.TestCase):
             p = [r.v, r.h, r.u, r.s, r.cp, r.w]
             np.testing.assert_almost_equal(properties, p, decimal=5)
 
+
 class TestRegion4(unittest.TestCase):
 
     def test_range_validity(self):
@@ -498,9 +499,19 @@ class TestRegion4(unittest.TestCase):
         for h, ps in zip(hs, pss):
             self.assertAlmostEqual(Region4.p_sat(h=h), ps)
 
+    def test_p_sat_s(self):
+        ss = [3.8, 4.2, 5.2]
+        pss = [1.687755057e1, 2.164451789e1, 1.668968482e1]
+
+        for s, ps in zip(ss, pss):
+            self.assertAlmostEqual(Region4.p_sat(s=s), ps)
+
     def test_t_sat_p(self):
         tees = [0.372755919e3, 0.453035632e3, 0.584149488e3]
         pss = [0.1, 1, 10]
+
+        for T, ps in zip(tees, pss):
+            self.assertAlmostEqual(Region4.T_sat(p=ps), T)
 
         for T, ps in zip(tees, pss):
             self.assertAlmostEqual(Region4.T_sat(p=ps), T)
