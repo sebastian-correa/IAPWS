@@ -2,10 +2,11 @@ import warnings
 
 import numpy as np
 from typing import Optional
-from collections import defaultdict
+from scipy.optimize import newton
 import math
 
 from ._utils import State, Region, R, _p_s
+
 
 class Region4(Region):
     """
@@ -80,24 +81,24 @@ class Region4(Region):
             self._state.T = T
             self._state.p = p
         elif p and h:
-            self._state.T = self.T_ph(p, h)
+            self._state.T = self.T_sat(p)
             self._state.p = p
             self._state.h = h
         elif p and s:
-            self._state.T = self.T_ps(p, s)
+            self._state.T = self.T_sat(p)
             self._state.p = p
             self._state.s = s
         elif T and h:
             self._state.T = T
-            self._state.p = self.p_Th(T=T, h=h)
+            self._state.p = self.p_sat(T=T)
             self._state.h = h
         elif T and s:
             self._state.T = T
-            self._state.p = self.p_Ts(T=T, s=s)
+            self._state.p = self.p_sat(T=T)
             self._state.s = s
         elif h and s:
-            self._state.p = self.p_hs(h, s)
-            self._state.T = self.T_ph(p, h)
+            self._state.p = self.p_sat(h=h)
+            self._state.T = self.T_sat(p)
             self._state.s = s
             self._state.h = h
         else:
@@ -105,36 +106,28 @@ class Region4(Region):
 
 
         if calc:
-            tau = 1386 / T
-            _pi = p / 16.53
-
             if not self._state in self:
                 # Find region number and return it.
                 pass
 
-            gg = Region1.base_eqn(T=T, p=p)
-            gp = Region1.base_der_pi_const_tau(T=T, p=p)
-            gt = Region1.base_der_tau_const_pi(T=T, p=p)
-            gpp = Region1.base_der2_pipi_const_tau(T=T, p=p)
-            gtt = Region1.base_der2_tautau_const_pi(T=T, p=p)
-            gpt = Region1.base_der2_pitau(T=T, p=p)
+            self._state.ders = None
 
-            self._state.ders = defaultdict(float, gamma=gg, gamma_pi=gp, gamma_tau=gt, gamma_pipi=gpp, gamma_tautau=gtt, gamma_pitau=gpt)
-
-            self._state.v = _pi * gp * R * T / p / 1000  # R*T/p has units of 1000 m^3/kg.
+            self._state.v = None
             self._state.rho = 1 / self._state.v
             self._state.u = R * T * (tau*gt - _pi*gp)
-            self._state.s = self._state.s if self._state.s is not None else R * (tau*gt - gg)
-            self._state.h = self._state.h if self._state.h is not None else R * T * tau * gt
-            self._state.cp = R * -tau**2 * gtt
-            self._state.cv = R * (-tau**2 * gtt + (gp-tau*gpt)**2 / gpp)
-            self._state.w = np.sqrt(1000 * R * T * gp**2 / ((gp-tau*gpt)**2 / (tau**2 * gtt) - gpp))  # 1000 is a conversion factor: sqrt(kJ/kg) = sqrt(1000 m/s) -> sqrt(1000) m/s
+            self._state.s = self._state.s if self._state.s is not None else None
+            self._state.h = self._state.h if self._state.h is not None else None
+            self._state.cp = None
+            self._state.cv = None
+            self._state.w = None
         else:
             self._state = State()
 
     def __contains__(self, other: State) -> bool:
         """
         Overrides the behaviour of the `in` operator to facilitate a `State in Region` query.
+        In enthalpy, the range is [1.670858218e3, 2.563592004e3] according to [4].
+        In entropy, the range is  [3.778281340, 5.210887825] according to [4].
         """
         if not isinstance(other, State):
             return False
@@ -154,6 +147,8 @@ class Region4(Region):
             s: Entropy (kJ/kg/K).
         Returns:
             The saturation pressure at the given temperature/enthalpy/entropy in MPa.
+        References:
+            [1], [4].
         """
         if T is not None and h is None and s is None:
             if not 273.15 <= T <= 647.096:
@@ -252,3 +247,44 @@ class Region4(Region):
         d = 2 * g / (-f - np.sqrt(f**2 - 4*e*g))
         ts = 1/2 * (Region4.table34[10] + d - np.sqrt( (Region4.table34[10] + d)**2 - 4*(Region4.table34[9] + Region4.table34[10]*d) ))
         return ts
+
+    def h_sat(self, x: int = 0, p: Optional[float] = None, T: Optional[float] = None) -> float:
+        """
+        Calculate the saturation enthalpy from either pressure or Temperature.
+        Args:
+            phase: Specify if the saturation enthalpy of 'liquid' (x=0) or 'steam' (x=1) should be calculated.
+            p: Pressure (MPa).
+            T: Temperature (K).
+        Returns:
+            Enthalpy of saturation in kJ/kg.
+        References:
+            [4].
+        Notes:
+            This function iterates on p_sat or T_sat. In order to try to find the correct enthalpy (as a root an equation),
+            the initial point is chosen to be the average of h_c and h'' for saturated vapor or the average of h_c and h'
+            for saturated liquid.
+            h_c taken from Wolfram|Alpha because it doesn't have to bee too exact.
+            Please see Figure 3 in [4].
+        """
+        if T is not None and p is None:
+            p = self.p_sat(T=T)
+
+        def f(h):
+            return self.p_sat(h=h) - p
+
+        if x == 0:
+            h0 = (2.084e3 + 1.670858218e3) / 2
+        elif x == 1:
+            h0 = (2.084e3 + 2.563592004e3) / 2
+        else:
+            warnings.warn('Quality (x) should only be 0 or 1. Otherwise, water is not saturated.', RuntimeWarning)
+        return newton(f, h0)
+
+
+r = Region4()
+hs = [1700, 2000, 2400]
+pss = [1.724175718e1, 2.193442957e1, 2.018090839e1]
+xx = [0,0,1]
+
+for h, ps, x in zip(hs, pss, xx):
+    print(h, r.h_sat(x=x, p=ps))

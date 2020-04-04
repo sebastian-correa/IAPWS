@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from typing import Optional
 from collections import defaultdict
-from scipy.optimize import fsolve, newton
+from scipy.optimize import newton
 
 from ._utils import State, Region, R, _p_s
 
