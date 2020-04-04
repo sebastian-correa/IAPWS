@@ -5,7 +5,7 @@ from typing import Optional
 from scipy.optimize import newton
 import math
 
-from ._utils import State, Region, R, _p_s
+from ._utils import State, Region, R, s_c
 
 
 class Region4(Region):
@@ -252,7 +252,7 @@ class Region4(Region):
         """
         Calculate the saturation enthalpy from either pressure or Temperature.
         Args:
-            phase: Specify if the saturation enthalpy of 'liquid' (x=0) or 'steam' (x=1) should be calculated.
+            x: Specify if the saturation enthalpy of 'liquid' (x=0) or 'steam' (x=1) should be calculated.
             p: Pressure (MPa).
             T: Temperature (K).
         Returns:
@@ -280,11 +280,33 @@ class Region4(Region):
             warnings.warn('Quality (x) should only be 0 or 1. Otherwise, water is not saturated.', RuntimeWarning)
         return newton(f, h0)
 
+    def s_sat(self, x: int = 0, p: Optional[float] = None, T: Optional[float] = None) -> float:
+        """
+        Calculate the saturation entropy from either pressure or Temperature.
+        Args:
+            x: Specify if the saturation enthalpy of 'liquid' (x=0) or 'steam' (x=1) should be calculated.
+            p: Pressure (MPa).
+            T: Temperature (K).
+        Returns:
+            Entropy of saturation in kJ/kg/K.
+        References:
+            [4].
+        Notes:
+            This function iterates on p_sat or T_sat. In order to try to find the correct enthalpy (as a root an equation),
+            the initial point is chosen to be the average of s_c and s'' for saturated vapor or the average of s_c and s'
+            for saturated liquid.
+            Please see Figure 4 in [4].
+        """
+        if T is not None and p is None:
+            p = self.p_sat(T=T)
 
-r = Region4()
-hs = [1700, 2000, 2400]
-pss = [1.724175718e1, 2.193442957e1, 2.018090839e1]
-xx = [0,0,1]
+        def f(s):
+            return self.p_sat(s=s) - p
 
-for h, ps, x in zip(hs, pss, xx):
-    print(h, r.h_sat(x=x, p=ps))
+        if x == 0:
+            s0 = (s_c + 3.778281340) / 2
+        elif x == 1:
+            s0 = (s_c + 5.210887825) / 2
+        else:
+            warnings.warn('Quality (x) should only be 0 or 1. Otherwise, water is not saturated.', RuntimeWarning)
+        return newton(f, s0)
