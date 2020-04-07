@@ -3,7 +3,7 @@ from iapws.iapws97.region1 import Region1
 from iapws.iapws97.region2 import Region2
 from iapws.iapws97.region3 import Region3
 from iapws.iapws97.region4 import Region4
-from iapws.iapws97._utils import b23, _p_s, State
+from iapws.iapws97._utils import b23, _p_s, State, _hpp_2ab, _hpp_2c3b, _h_b13, _T_b23, _hp_1, _hp_3a
 import numpy as np
 
 # TODO: Maybe increase precision to X after comma with X the number of digits after comma of the data values.
@@ -42,6 +42,49 @@ class GeneralTests(unittest.TestCase):
     
     def test_p_s_exeption(self):
         self.assertRaises(ValueError, _p_s, T=1000)
+
+    def test__h_2ab(self):
+        ss = [7, 8, 9]
+        hs = [2.723729985e3,2.599047210e3, 2.511861477e3]
+
+        for s, h in zip(ss, hs):
+            self.assertAlmostEqual(_hpp_2ab(s), h, places=5)
+
+    def test__h_2c3b(self):
+        ss = [5.5, 5, 4.5]
+        hs = [2.687693850e3 , 2.451623609e3, 2.144360448e3]
+
+        for s, h in zip(ss, hs):
+            self.assertAlmostEqual(_hpp_2c3b(s), h, places=5)
+
+    def test__h_b13(self):
+        ss = [3.7, 3.6, 3.5]
+        hs = [1.632525047e3, 1.593027214e3, 1.566104611e3]
+
+        for s, h in zip(ss, hs):
+            self.assertAlmostEqual(_h_b13(s), h, places=5)
+
+    def test__T_b23(self):
+        ss = [5.1, 5.15, 5.2]
+        hs = [2600, 2700, 2800]
+        tees = [7.135259364e2, 7.685345532e2, 8.176202120e2]
+
+        for s, h, t in zip(ss, hs, tees):
+            self.assertAlmostEqual(_T_b23(h, s), t, places=5)
+
+    def test__hp_1(self):
+        ss = [1, 2, 3]
+        hs = [3.08550964732e2, 7.006304472e2 ,1.198359754e3]
+
+        for s, h in zip(ss, hs):
+            self.assertAlmostEqual(_hp_1(s), h, places=5)
+
+    def test__hp_3a(self):
+        ss = [3.8, 4, 4.2]
+        hs = [1.685025565e3, 1.816891476e3, 1.949352563e3]
+
+        for s, h in zip(ss, hs):
+            self.assertAlmostEqual(_hp_3a(s), h, places=5)
 
 class TestRegion1(unittest.TestCase):
 
@@ -474,6 +517,7 @@ class TestRegion3(unittest.TestCase):
 class TestRegion4(unittest.TestCase):
 
     def test_range_validity(self):
+        assert 1==2
         s = State(T=300, p=3)
         s1 = State(T=300, p=80)
         s2 = State(T=500, p=3)
@@ -511,30 +555,16 @@ class TestRegion4(unittest.TestCase):
         pss = [0.1, 1, 10]
 
         for T, ps in zip(tees, pss):
-            self.assertAlmostEqual(Region4.T_sat(p=ps), T)
+            self.assertAlmostEqual(Region4.T_sat(p=ps), T, places=5)
 
-        for T, ps in zip(tees, pss):
-            self.assertAlmostEqual(Region4.T_sat(p=ps), T)
+    def test_t_sat_hs(self):
+        hs = [1800, 2400, 2500]
+        ss = [5.3, 6, 5.5]
+        ts = [3.468475498e2, 4.251373305e2, 5.225579013e2]
 
-    def test_property_accuracy(self):
-        """Test the results from Table 5."""
-        s = State(T=300, p=3)
-        s1 = State(T=300, p=80)
-        s2 = State(T=500, p=3)
-        states = [s, s1, s2]
+        for h, s, t in zip(hs, ss, ts):
+            self.assertAlmostEqual(Region4().T_sat(h=h, s=s), t, places=5)
 
-        table5 = np.array([[0.100215168e-2, 0.971180894e-3, 0.120241800e-2],
-                           [0.115331273e3, 0.184142828e3, 0.975542239e3],
-                           [0.112324818e3, 0.106448356e3, 0.971934985e3],
-                           [0.392294792, 0.368563852, 0.258041912e1],
-                           [0.417301218e1, 0.401008987e1, 0.465580682e1],
-                           [0.150773921e4, 0.163469054e4, 0.124071337e4]])
-        table5 = table5.T
-
-        for state, properties in zip(states, table5):
-            r = Region1(state=state)
-            p = [r.v, r.h, r.u, r.s, r.cp, r.w]
-            np.testing.assert_almost_equal(properties, p, decimal=5)
 
 if __name__ == '__main__':
     unittest.main()
