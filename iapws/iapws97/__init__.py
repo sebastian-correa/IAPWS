@@ -21,5 +21,11 @@ __references__ = {1: dict(Title='Revised Release on the IAPWS Industrial '
                                 'h) and T(p,s), v(p,s) for Region 3 of the IAPWS Industrial Formulation 1997 for the '
                                 'Thermodynamic Properties of Water and Steam',
                           Date=date(2014, 6, 1),
-                          url='http://www.iapws.org/relguide/Supp-Tv(ph,ps)3-2014.pdf')
+                          url='http://www.iapws.org/relguide/Supp-Tv(ph,ps)3-2014.pdf'),
+                  5: dict(Title='Revised Supplementary Release on Backward Equations p(h,s) for Region 3,'
+                                'Equations as a Function of h and s for the Region Boundaries, and an Equation'
+                                ' T sat (h,s) for Region 4 of the IAPWS Industrial Formulation 1997 for the '
+                                'Thermodynamic Properties of Water and Steam',
+                          Date=date(2014, 6, 1),
+                          url='http://www.iapws.org/relguide/Supp-phs3-2014.pdf')
                   }
