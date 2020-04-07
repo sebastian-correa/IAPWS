@@ -7,6 +7,11 @@ import math
 
 from ._utils import State, Region, R, s_c
 
+hp = 1.670858218e3
+hpp = 2.563592004e3
+sp = 3.778281340
+spp = 5.210887825
+
 
 class Region4(Region):
     """
@@ -54,8 +59,45 @@ class Region4(Region):
                          9: {'I': 28, 'J': 0, 'n': 0.119254746466473e12},
                          10: {'I': 32, 'J': 18, 'n': 0.110649277244882e37}}
 
+    table28_supp_ref5 = {0: {'I': 0, 'J': 0, 'n': 0.179882673606601},
+                         1: {'I': 0, 'J': 3, 'n': -0.267507455199603},
+                         2: {'I': 0, 'J': 12, 'n': 1.162767226126},
+                         3: {'I': 1, 'J': 0, 'n': 0.147545428713616},
+                         4: {'I': 1, 'J': 1, 'n': -0.512871635973248},
+                         5: {'I': 1, 'J': 2, 'n': 0.421333567697984},
+                         6: {'I': 1, 'J': 5, 'n': 0.56374952218987},
+                         7: {'I': 2, 'J': 0, 'n': 0.429274443819153},
+                         8: {'I': 2, 'J': 5, 'n': -3.3570455214214},
+                         9: {'I': 2, 'J': 8, 'n': 10.8890916499278},
+                         10: {'I': 3, 'J': 0, 'n': -0.248483390456012},
+                         11: {'I': 3, 'J': 2, 'n': 0.30415322190639},
+                         12: {'I': 3, 'J': 3, 'n': -0.494819763939905},
+                         13: {'I': 3, 'J': 4, 'n': 1.07551674933261},
+                         14: {'I': 4, 'J': 0, 'n': 0.0733888415457688},
+                         15: {'I': 4, 'J': 1, 'n': 0.0140170545411085},
+                         16: {'I': 5, 'J': 1, 'n': -0.106110975998808},
+                         17: {'I': 5, 'J': 2, 'n': 0.0168324361811875},
+                         18: {'I': 5, 'J': 4, 'n': 1.25028363714877},
+                         19: {'I': 5, 'J': 16, 'n': 1013.16840309509},
+                         20: {'I': 6, 'J': 6, 'n': -1.51791558000712},
+                         21: {'I': 6, 'J': 8, 'n': 52.4277865990866},
+                         22: {'I': 6, 'J': 22, 'n': 23049.5545563912},
+                         23: {'I': 8, 'J': 1, 'n': 0.0249459806365456},
+                         24: {'I': 10, 'J': 20, 'n': 2107964.67412137},
+                         25: {'I': 10, 'J': 36, 'n': 366836848.613065},
+                         26: {'I': 12, 'J': 24, 'n': -144814105.365163},
+                         27: {'I': 14, 'J': 1, 'n': -0.0017927637300359},
+                         28: {'I': 14, 'J': 28, 'n': 4899556021.00459},
+                         29: {'I': 16, 'J': 12, 'n': 471.262212070518},
+                         30: {'I': 16, 'J': 32, 'n': -82929439019.8652},
+                         31: {'I': 18, 'J': 14, 'n': -1715.45662263191},
+                         32: {'I': 18, 'J': 22, 'n': 3557776.82973575},
+                         33: {'I': 18, 'J': 36, 'n': 586062760258.436},
+                         34: {'I': 20, 'J': 24, 'n': -12988763.5078195},
+                         35: {'I': 28, 'J': 36, 'n': 31724744937.1057}}
 
-    def __init__(self, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
+
+    def __init__(self, x: Optional[float] = None, T: Optional[float] = None, p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None, state: Optional[State] = None):
         """
         If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region4` check can be performed easily.
         """
@@ -76,7 +118,7 @@ class Region4(Region):
         # Cases are handled such that after this if/elif/else block, p and T are always determined.
         if all(param is None for param in params) and state is None:
             calc = False
-            # Let the class instantiate so that someone can perform a `State in Region1()` check.
+            # Let the class instantiate so that someone can perform a `State in Region4()` check.
         elif p and T:
             self._state.T = T
             self._state.p = p
@@ -140,7 +182,7 @@ class Region4(Region):
     @staticmethod
     def base_eqn(T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:
         """
-        Equation for saturation pressure as a function of temperature (equation 30), enthalpy (eqn.10 [4]) or entropy (eqn 11 [4]).
+        Equation for saturation pressure as a function of temperature (equation 30), enthalpy (eqn.10 [4]), entropy (eqn 11 [4]) or enthalpy and entropy (eqn 9 [5]).
         Args:
             T: Temperature (K).
             h: Enthalpy (kJ/kg).
@@ -148,7 +190,7 @@ class Region4(Region):
         Returns:
             The saturation pressure at the given temperature/enthalpy/entropy in MPa.
         References:
-            [1], [4].
+            [1], [4], [5].
         """
         if T is not None and h is None and s is None:
             if not 273.15 <= T <= 647.096:
@@ -160,11 +202,21 @@ class Region4(Region):
             p = 2 * C / (-B + np.sqrt(B ** 2 - 4 * A * C))
             return p ** 4
         elif h is not None and T is None and s is None:
-            eta = h / 2600
-            return 22 * sum(entry['n'] * (eta - 1.02)**entry['I'] * (eta - 0.608)**entry['J'] for entry in Region4.table17_supp_ref4.values())
+            if hp <= h <= hpp:
+                eta = h / 2600
+                return 22 * sum(entry['n'] * (eta - 1.02)**entry['I'] * (eta - 0.608)**entry['J'] for entry in Region4.table17_supp_ref4.values())
+            else:
+                raise NotImplementedError('Try also supplying a value for s.')
         elif s is not None and T is None and h is None:
-            sigma = s / 5.2
-            return 22 * sum(entry['n'] * (sigma - 1.03)**entry['I'] * (sigma - 0.699)**entry['J'] for entry in Region4.table19_supp_ref4.values())
+            if sp <= s <= spp:
+                sigma = s / 5.2
+                return 22 * sum(entry['n'] * (sigma - 1.03)**entry['I'] * (sigma - 0.699)**entry['J'] for entry in Region4.table19_supp_ref4.values())
+            else:
+                raise NotImplementedError('Try also supplying a value for h.')
+        elif s is not None and h is not None and T is None:
+            T = Region4.T_sat(h=h, s=s)
+            return Region4.base_eqn(T=T)
+
 
     @staticmethod
     def p_sat(T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:
@@ -232,20 +284,34 @@ class Region4(Region):
     #############################################################
     ####################### Backwards ###########################
     #############################################################
-    def T_sat(self, p: float) -> float:
+    @staticmethod
+    def T_sat(p: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:
         """
-        Backwards equation for calculating Saturation Temperature as a function of pressure and enthalpy.
+        Backwards equation for calculating Saturation Temperature as a function of pressure or enthalpy and entropy.
         Args:
             p: Pressure (MPa).
+            h: Enthalpy (kJ/kg).
+            s: Entropy (kJ/kg/K).
         Returns:
             Temperature (K).
+        References:
+            [1], [5].
         """
-        beta = p**(1/4)
-        g = Region4.table34[2] * beta**2 + Region4.table34[5] * beta + Region4.table34[8]
-        f = Region4.table34[1] * beta**2 + Region4.table34[4] * beta + Region4.table34[7]
-        e = beta ** 2 + Region4.table34[3] * beta + Region4.table34[6]
-        d = 2 * g / (-f - np.sqrt(f**2 - 4*e*g))
-        ts = 1/2 * (Region4.table34[10] + d - np.sqrt( (Region4.table34[10] + d)**2 - 4*(Region4.table34[9] + Region4.table34[10]*d) ))
+        if p is not None and (h is None and s is None):
+            beta = p**(1/4)
+            g = Region4.table34[2] * beta**2 + Region4.table34[5] * beta + Region4.table34[8]
+            f = Region4.table34[1] * beta**2 + Region4.table34[4] * beta + Region4.table34[7]
+            e = beta ** 2 + Region4.table34[3] * beta + Region4.table34[6]
+            d = 2 * g / (-f - np.sqrt(f**2 - 4*e*g))
+            ts = 1/2 * (Region4.table34[10] + d - np.sqrt( (Region4.table34[10] + d)**2 - 4*(Region4.table34[9] + Region4.table34[10]*d) ))
+        elif (h is not None and s is not None) and p is None:
+            # Eqn 9 [5].
+            if s >= spp:
+                eta = h / 2800
+                sigma = s / 9.2
+                ts = 550 * sum(entry['n'] * (eta - 0.119)**entry['I'] * (sigma - 1.07)**entry['J'] for entry in Region4.table28_supp_ref5.values())
+            else:
+                raise NotImplementedError(f's should be >= {spp}. {s} given.')
         return ts
 
     def h_sat(self, x: int = 0, p: Optional[float] = None, T: Optional[float] = None) -> float:
@@ -273,9 +339,9 @@ class Region4(Region):
             return self.p_sat(h=h) - p
 
         if x == 0:
-            h0 = (2.084e3 + 1.670858218e3) / 2
+            h0 = (2.084e3 + hp) / 2
         elif x == 1:
-            h0 = (2.084e3 + 2.563592004e3) / 2
+            h0 = (2.084e3 + hpp) / 2
         else:
             warnings.warn('Quality (x) should only be 0 or 1. Otherwise, water is not saturated.', RuntimeWarning)
         return newton(f, h0)
@@ -304,9 +370,9 @@ class Region4(Region):
             return self.p_sat(s=s) - p
 
         if x == 0:
-            s0 = (s_c + 3.778281340) / 2
+            s0 = (s_c + sp) / 2
         elif x == 1:
-            s0 = (s_c + 5.210887825) / 2
+            s0 = (s_c + spp) / 2
         else:
             warnings.warn('Quality (x) should only be 0 or 1. Otherwise, water is not saturated.', RuntimeWarning)
         return newton(f, s0)
