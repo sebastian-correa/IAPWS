@@ -6,6 +6,9 @@ from scipy.optimize import newton
 import math
 
 from ._utils import State, Region, R, s_c
+from iapws.iapws97.region1 import Region1
+from iapws.iapws97.region2 import Region2
+from iapws.iapws97.region3 import Region3
 
 hp = 1.670858218e3
 hpp = 2.563592004e3
@@ -101,17 +104,18 @@ class Region4(Region):
         """
         If all parameters are None (their default), then an empty instance is instanciated. This is to that a `State in Region4` check can be performed easily.
         """
-        params = [p, T, h, s]
+        params = [x, p, T, h, s]
         if state is not None and all(param is None for param in params):
             # Case: Only state is given. To handle: convert to normal case.
+            x = state.x
             p = state.p
             T = state.T
             h = state.h
             s = state.s
         elif state is not None and any(param is None for param in params):
-            raise ValueError('If state is given, no values for p, t, h and s can be given.')
+            raise ValueError('If state is given, no values for x, p, T, h and s can be given.')
 
-        params = [p, T, h, s]
+        params = [x, p, T, h, s]
         calc = True
         self._state = State()
 
@@ -119,38 +123,41 @@ class Region4(Region):
         if all(param is None for param in params) and state is None:
             calc = False
             # Let the class instantiate so that someone can perform a `State in Region4()` check.
-        elif p and T:
-            self._state.T = T
-            self._state.p = p
-        elif p and h:
-            self._state.T = self.T_sat(p)
-            self._state.p = p
-            self._state.h = h
-        elif p and s:
-            self._state.T = self.T_sat(p)
-            self._state.p = p
-            self._state.s = s
-        elif T and h:
-            self._state.T = T
-            self._state.p = self.p_sat(T=T)
-            self._state.h = h
-        elif T and s:
-            self._state.T = T
-            self._state.p = self.p_sat(T=T)
-            self._state.s = s
-        elif h and s:
-            self._state.p = self.p_sat(h=h)
-            self._state.T = self.T_sat(p)
-            self._state.s = s
-            self._state.h = h
-        else:
-            raise ValueError('You should only pass one of the following combinations to determine a state in Reg1: (p,T) (p, h), (p, s), (T, h), (T,s), (h, s).')
+        if x is None:
+            raise ValueError('Vapor quality (x) is needed to calculate a State in Region4.')
+        self._state.x = x
 
+        if p:
+            self._state.p = p
+            self._state.T = self.T_sat(p=p)
+        elif T:
+            self._state.p = self.p_sat(T=T)
+            self._state.T = T
+        elif h:
+            self._state.p = self.p_sat(h=h)
+            self._state.T = self.T_sat(p=self._state.p)
+            self._state.h = h
+        elif s:
+            self._state.p = self.p_sat(s=s)
+            self._state.T = self.T_sat(p=self._state.p)
+            self._state.s = s
+        else:
+            raise ValueError('You should only pass one of the following combinations to determine a state in Reg1: (x,p), (x, T), (x, h), (x, s).')
 
         if calc:
-            if not self._state in self:
+            if self._state not in self:
                 # Find region number and return it.
                 pass
+            # T, p and x already set.
+            if T > 623.15:
+                rho_sat_liq = 0
+                rho_sat_vap = 0
+
+                sat_liq = Region3(T=self._state.T, p=self._state.p)
+                sat_vap = Region3(T=self._state.T, p=self._state.p)
+            else:
+                sat_liq = Region1(T=self._state.T, p=self._state.p)
+                sat_vap = Region2(T=self._state.T, p=self._state.p)
 
             self._state.ders = None
 
@@ -182,7 +189,7 @@ class Region4(Region):
     @staticmethod
     def base_eqn(T: Optional[float] = None, h: Optional[float] = None, s: Optional[float] = None) -> float:
         """
-        Equation for saturation pressure as a function of temperature (equation 30), enthalpy (eqn.10 [4]), entropy (eqn 11 [4]) or enthalpy and entropy (eqn 9 [5]).
+        Equation for saturation pressure as a function of temperature (equation 30), enthalpy (eqn.10 [4]), entropy (eqn 11 [4]) or enthalpy and entropy (eqn 9 [2]).
         Args:
             T: Temperature (K).
             h: Enthalpy (kJ/kg).
@@ -190,7 +197,7 @@ class Region4(Region):
         Returns:
             The saturation pressure at the given temperature/enthalpy/entropy in MPa.
         References:
-            [1], [4], [5].
+            [1], [4], [2].
         """
         if T is not None and h is None and s is None:
             if not 273.15 <= T <= 647.096:
@@ -295,7 +302,7 @@ class Region4(Region):
         Returns:
             Temperature (K).
         References:
-            [1], [5].
+            [1], [2].
         """
         if p is not None and (h is None and s is None):
             beta = p**(1/4)
@@ -305,7 +312,7 @@ class Region4(Region):
             d = 2 * g / (-f - np.sqrt(f**2 - 4*e*g))
             ts = 1/2 * (Region4.table34[10] + d - np.sqrt( (Region4.table34[10] + d)**2 - 4*(Region4.table34[9] + Region4.table34[10]*d) ))
         elif (h is not None and s is not None) and p is None:
-            # Eqn 9 [5].
+            # Eqn 9 [2].
             if s >= spp:
                 eta = h / 2800
                 sigma = s / 9.2
